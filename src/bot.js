@@ -26,8 +26,8 @@ const replyMessage = (message, text, res) => {
 	request('https://api.chucknorris.io/jokes/random', (_err, _res, body) => {
         body = JSON.parse(body)
         const content = body.value
-  
-        return message ? message.reply([{ type: 'text', content }]).then() : res.json({ reply: content })
+		console.log("content"+content)
+        return message ? message.reply([{ type: 'text', content }]).then() : _res.json({ reply: content })
       })
   })
 }
