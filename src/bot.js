@@ -22,7 +22,7 @@ const replyMessage = (message, text, res) => {
   recastaiReq.analyseText(content)
   .then(recastaiRes => {
 	const varcontent = 'réponse!'
-	return message ? message.reply([{ type: 'text', content: varcontent }]).then() : { reply: varcontent }
+	return message ? message.reply([{ type: 'text', content: varcontent }]).then() : varcontent
 	/*request('https://api.chucknorris.io/jokes/random', (_err, _res, body) => {
         body = JSON.parse(body)
         const content = body.value
