@@ -5,10 +5,10 @@ const request = require('request')
 export const bot = (body, response, callback) => {
   console.log(body)
 
-  if (body.message) {
+  if (body.message || body.text) {
     client.connect.handleMessage({ body }, response, replyMessage)
-  } else if (body.text) {
-    callback(null, { result: 'Bot echo '+body.text+' :)' })
+  //} else if (body.text) {
+  //  callback(null, { result: 'Bot echo '+body.text+' :)' })
   } else {
     callback('No text provided')
   }
@@ -16,7 +16,7 @@ export const bot = (body, response, callback) => {
 
 const replyMessage = (message, text, res) => {
   const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-  const content = message.content
+  const content = (message ? message.content : text)
 	console.log("content:"+content)
   recastaiReq.analyseText(content)
   .then(recastaiRes => {
@@ -50,18 +50,18 @@ const replyMessage = (message, text, res) => {
 							varcontent = 'Je n\'ai rien trouvé!'
 						}
 					}
-					return message.reply([{ type: 'text', content: varcontent }]).then()
+					return message ? message.reply([{ type: 'text', content: varcontent }]).then() : res.json({ result: varcontent})
 				  })
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
 			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.converseText(content)
 			.then(recastaiConvRes => {
-				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
+				return message ? message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then() : res.json({ result: recastaiConvRes.reply()})
 			})
 		}
 	} else {
-		return message.reply([{ type: 'text', content: varcontent }]).then()
+		return message ? message.reply([{ type: 'text', content: varcontent }]).then() : res.json({ result: varcontent})
 	}
   })
 }
