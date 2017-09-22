@@ -7,9 +7,8 @@ export const bot = (body, response, callback) => {
 
   if (body.message) {
     client.connect.handleMessage({ body }, response, replyMessage)
-    callback(null, { result: 'Bot answered :)' })
   } else if (body.text) {
-    replyMessage(null, body.text, response)
+    callback(null, { result: 'Bot echo '+body.text+' :)' })
   } else {
     callback('No text provided')
   }
@@ -17,17 +16,12 @@ export const bot = (body, response, callback) => {
 
 const replyMessage = (message, text, res) => {
   const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-  const content = (message ? message.content : text)
-
+  const content = message.content
+	console.log("content:"+content)
   recastaiReq.analyseText(content)
   .then(recastaiRes => {
+	console.log("ai:"+recastaiRes)
 	const varcontent = 'réponse!'
-	return message ? message.reply([{ type: 'text', content: varcontent }]).then() : varcontent
-	/*request('https://api.chucknorris.io/jokes/random', (_err, _res, body) => {
-        body = JSON.parse(body)
-        const content = body.value
-		console.log("content"+content)
-        return message ? message.reply([{ type: 'text', content }]).then() : res.json({ reply: content })
-      })*/
+	return message.reply([{ type: 'text', content: varcontent }]).then()
   })
 }
