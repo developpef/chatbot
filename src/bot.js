@@ -27,9 +27,9 @@ const replyMessage = (message, text, res) => {
 	if(intent) {
 		console.log("intent:"+intent.slug+"/"+intent.confidence)
 		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
-			var asset = recastaiRes.get('asset-type').name
+			var asset = recastaiRes.get('asset-type').raw
 			console.log("asset:"+asset)
-			var number = recastaiRes.get('number').name
+			var number = recastaiRes.get('number').raw
 			console.log("number:"+number)
 			varcontent = 'je vais chercher la '+asset+' '+number
 			 
