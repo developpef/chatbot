@@ -20,7 +20,7 @@ const replyMessage = (message, text, res) => {
 	console.log("content:"+content)
   recastaiReq.analyseText(content)
   .then(recastaiRes => {
-	var varcontent = 'réponse!'
+	var varcontent = 'Je ne comprends pas...'
 	
 	// get the intent detected
     var intent = recastaiRes.intent()
