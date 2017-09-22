@@ -40,11 +40,15 @@ const replyMessage = (message, text, res) => {
 				},
 				(_err, _res, body) => {
 					if(_err) {
-						varcontent = 'Je n\'ai rien trouvé!'
+						varcontent = 'Il y a eu un problème...'
 					} else {
 						body = JSON.parse(body)
 						console.log("C8Y resp:"+body)
-						varcontent = 'Juste ici : '+body.managedObject['self']+' !'
+						if(body.managedObject) {
+							varcontent = 'Juste ici : '+body.managedObject['self']+' !'
+						} else {
+							varcontent = 'Je n\'ai rien trouvé!'
+						}
 					}
 					return message.reply([{ type: 'text', content: varcontent }]).then()
 				  })
@@ -53,7 +57,7 @@ const replyMessage = (message, text, res) => {
 			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.converseText(content)
 			.then(recastaiConvRes => {
-				return message.reply(recastaiConvRes.reply()).then()
+				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
 			})
 		}
 	} else {
