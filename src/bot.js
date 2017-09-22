@@ -24,24 +24,28 @@ const replyMessage = (message, text, res) => {
 	
 	// get the intent detected
     var intent = recastaiRes.intent()
-	console.log("intent:"+intent.slug+"/"+intent.confidence)
-	if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
-		var asset = recastaiRes.get('asset-type')
-		console.log("asset:"+asset)
-		var number = recastaiRes.get('number')
-		console.log("number:"+number)
-		varcontent = 'je vais chercher la '+asset+' '+number
-		
-		request(
-			{
-				url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
-				headers : {"Authorization" : "Basic cGF1bC1lbW1hbnVlbC5mYWlkaGVyYmVAZ2ZpLmZyOiFhbjEyUEVG"}
-			},
-			(_err, _res, body) => {
-				body = JSON.parse(body)
-				varcontent = 'Juste ici : '+body.self+' !'
-			  })
-    }
-	return message.reply([{ type: 'text', content: varcontent }]).then()
+	if(intent) {
+		console.log("intent:"+intent.slug+"/"+intent.confidence)
+		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
+			var asset = recastaiRes.get('asset-type').slug
+			console.log("asset:"+asset)
+			var number = recastaiRes.get('number').slug
+			console.log("number:"+number)
+			varcontent = 'je vais chercher la '+asset+' '+number
+			
+			request(
+				{
+					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
+					headers : {"Authorization" : "Basic cGF1bC1lbW1hbnVlbC5mYWlkaGVyYmVAZ2ZpLmZyOiFhbjEyUEVG"}
+				},
+				(_err, _res, body) => {
+					body = JSON.parse(body)
+					varcontent = 'Juste ici : '+body.self+' !'
+					return message.reply([{ type: 'text', content: varcontent }]).then()
+				  })
+		}
+	} else {
+		return message.reply([{ type: 'text', content: varcontent }]).then()
+	}
   })
 }
