@@ -21,7 +21,13 @@ const replyMessage = (message, text, res) => {
 
   recastaiReq.analyseText(content)
   .then(recastaiRes => {
-	const content = 'réponse!'
-	return message ? message.reply([{ type: 'text', content }]).then() : res.json({ reply: content })
+	/*const content = {value:'réponse!'}
+	return message ? message.reply([{ type: 'text', content }]).then() : res.json({ reply: content })*/
+	request('https://api.chucknorris.io/jokes/random', (_err, _res, body) => {
+        body = JSON.parse(body)
+        const content = body.value
+  
+        return message ? message.reply([{ type: 'text', content }]).then() : res.json({ reply: content })
+      })
   })
 }
