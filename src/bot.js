@@ -32,7 +32,7 @@ const replyMessage = (message, text, res) => {
 			var number = recastaiRes.get('number').slug
 			console.log("number:"+number)
 			varcontent = 'je vais chercher la '+asset+' '+number
-			
+			 
 			request(
 				{
 					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
