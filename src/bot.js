@@ -25,7 +25,7 @@ const replyMessage = (message, text, res) => {
 	// get the intent detected
     var intent = res.intent()
 	console.log("intent:"+intent.slug+"/"+intent.confidence)
-	if (intent.slug === 'geetings' && intent.confidence > 0.7) {
+	if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
 		var asset = res.get('asset-type')
 		console.log("asset:"+asset)
 		var number = res.get('number')
