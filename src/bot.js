@@ -40,7 +40,8 @@ const replyMessage = (message, text, res) => {
 				},
 				(_err, _res, body) => {
 					body = JSON.parse(body)
-					varcontent = 'Juste ici : '+body.self+' !'
+					console.log("C8Y resp:"+body)
+					varcontent = 'Juste ici : '+body.managedObject['self']+' !'
 					return message.reply([{ type: 'text', content: varcontent }]).then()
 				  })
 		}
