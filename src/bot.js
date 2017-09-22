@@ -20,8 +20,18 @@ const replyMessage = (message, text, res) => {
 	console.log("content:"+content)
   recastaiReq.analyseText(content)
   .then(recastaiRes => {
-	console.log("ai:"+recastaiRes)
 	const varcontent = 'réponse!'
+	
+	// get the intent detected
+    var intent = res.intent()
+	console.log("intent:"+intent.slug+"/"+intent.confidence)
+	if (intent.slug === 'geetings' && intent.confidence > 0.7) {
+		var asset = res.get('asset-type')
+		console.log("asset:"+asset)
+		var number = res.get('number')
+		console.log("number:"+number)
+		varcontent = 'je vais chercher la '+asset+' '+number
+    }
 	return message.reply([{ type: 'text', content: varcontent }]).then()
   })
 }
