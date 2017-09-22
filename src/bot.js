@@ -39,11 +39,22 @@ const replyMessage = (message, text, res) => {
 					headers : {"Authorization" : "Basic cGF1bC1lbW1hbnVlbC5mYWlkaGVyYmVAZ2ZpLmZyOiFhbjEyUEVG"}
 				},
 				(_err, _res, body) => {
-					body = JSON.parse(body)
-					console.log("C8Y resp:"+body)
-					varcontent = 'Juste ici : '+body.managedObject['self']+' !'
+					if(_err) {
+						varcontent = 'Je n\'ai rien trouvé!'
+					} else {
+						body = JSON.parse(body)
+						console.log("C8Y resp:"+body)
+						varcontent = 'Juste ici : '+body.managedObject['self']+' !'
+					}
 					return message.reply([{ type: 'text', content: varcontent }]).then()
 				  })
+		} else {
+			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
+			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			converseReq.converseText(content)
+			.then(recastaiConvRes => {
+				return message.reply(recastaiConvRes.reply()).then()
+			})
 		}
 	} else {
 		return message.reply([{ type: 'text', content: varcontent }]).then()
