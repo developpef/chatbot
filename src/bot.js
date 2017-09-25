@@ -6,9 +6,10 @@ export const bot = (body, response, callback) => {
   console.log(body)
 
   if (body.message) {
+	// pour gérer les appels par Slack
     client.connect.handleMessage({ body }, response, replyMessage)
   } else if (body.text) {
-    //callback(null, { result: replyRaw(body.text) })
+    // pour gérer les appels par API REST en direct
 	replyRaw(body.text, callback)
   } else {
     callback('Requete vide?!') 
