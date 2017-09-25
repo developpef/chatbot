@@ -11,7 +11,7 @@ export const bot = (body, response, callback) => {
     //callback(null, { result: replyRaw(body.text) })
 	replyRaw(body.text, callback)
   } else {
-    callback('No text provided')
+    callback('No text provided') 
   }
 }
 
