@@ -8,13 +8,14 @@ export const bot = (body, response, callback) => {
   if (body.message) {
     client.connect.handleMessage({ body }, response, replyMessage)
   } else if (body.text) {
-    callback(null, { result: replyRaw(body.text) })
+    //callback(null, { result: replyRaw(body.text) })
+	replyRaw(body.text, callback)
   } else {
     callback('No text provided')
   }
 }
 
-function replyRaw (text) {
+function replyRaw (text, callback) {
   const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
   const content = text
 	console.log("content:"+content)
@@ -50,18 +51,18 @@ function replyRaw (text) {
 							varcontent = 'Je n\'ai rien trouvé!'
 						}
 					}
-					return varcontent
+					callback(null, { result: varcontent })
 				  })
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
 			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.converseText(content)
 			.then(recastaiConvRes => {
-				return recastaiConvRes.reply()
+				callback(null, { result: recastaiConvRes.reply() })
 			})
 		}
 	} else {
-		return varcontent
+		callback(null, { result: varcontent })
 	}
   })
 }
