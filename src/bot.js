@@ -52,18 +52,18 @@ function replyRaw (text, callback) {
 							varcontent = 'Je n\'ai rien trouvé!'
 						}
 					}
-					callback(null, { result: varcontent })
+					callback(null, { result: varcontent, intent : intent.slug })
 				  })
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
 			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.converseText(content)
 			.then(recastaiConvRes => {
-				callback(null, { result: recastaiConvRes.reply() })
+				callback(null, { result: recastaiConvRes.reply(), intent : intent.slug })
 			})
 		}
 	} else {
-		callback(null, { result: varcontent })
+		callback(null, { result: varcontent, intent : 'null' })
 	}
   })
 }
