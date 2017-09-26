@@ -10,6 +10,7 @@ public class ChatMessage {
     private String message;
     private Long userId;
     private String dateTime;
+    private boolean isMap;
 
     public long getId() {
         return id;
@@ -43,5 +44,13 @@ public class ChatMessage {
 
     public void setDate(String dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public boolean isMap() {
+        return isMap;
+    }
+
+    public void setMap(boolean map) {
+        isMap = map;
     }
 }

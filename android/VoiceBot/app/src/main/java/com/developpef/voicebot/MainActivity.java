@@ -2,6 +2,7 @@ package com.developpef.voicebot;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -128,15 +129,14 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 try {
-                                    /*Toast.makeText(getApplicationContext(),
-                                            "success:" + response.getString("result"),
-                                            Toast.LENGTH_SHORT).show();*/
                                     //txtSpeechInput.setText(response.getString("result"));
+                                    String intentResp = response.getString("intent");
                                     ChatMessage chatMessage = new ChatMessage();
                                     chatMessage.setId(122);//dummy
                                     chatMessage.setMessage(response.getString("result"));
                                     chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                                     chatMessage.setMe(false);
+                                    chatMessage.setMap(intentResp!=null?intentResp.equals("c8y_geoloc"):false);
                                     displayMessage(chatMessage);
                                 } catch (JSONException e) {
                                     Toast.makeText(getApplicationContext(),

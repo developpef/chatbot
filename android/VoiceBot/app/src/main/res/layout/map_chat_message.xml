@@ -2,32 +2,32 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
     <LinearLayout
-        android:id="@+id/content"
+        android:id="@+id/contentMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:padding="10dp"
         android:orientation="vertical">
         <TextView
-            android:id="@+id/txtInfo"
+            android:id="@+id/txtInfoMap"
             android:layout_width="wrap_content"
             android:layout_height="20sp"
             android:layout_gravity="right"
             android:textSize="12sp"
             android:textColor="@android:color/darker_gray" />
         <LinearLayout
-            android:id="@+id/contentWithBackground"
+            android:id="@+id/contentMapBg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_alignParentRight="true"
             android:padding="10dp"
+            android:background="@drawable/in_msg_bg"
             android:orientation="vertical">
-            <TextView
-                android:id="@+id/txtMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:maxWidth="240dp" />
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:id="@+id/map"
+                android:layout_width="200dp"
+                android:layout_height="200dp" />
         </LinearLayout>
-
     </LinearLayout>
 </RelativeLayout>

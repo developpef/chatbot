@@ -2,6 +2,7 @@ package com.developpef.voicebot;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Location;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,24 +53,33 @@ public class ChatAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
         ChatMessage chatMessage = getItem(position);
         LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if(!chatMessage.isMap()) {
+            ViewHolder holder;
 
-        if (convertView == null) {
-            convertView = vi.inflate(R.layout.list_item_chat_message, null);
-            holder = createViewHolder(convertView);
-            convertView.setTag(holder);
+            if (convertView == null) {
+                convertView = vi.inflate(R.layout.list_item_chat_message, null);
+                holder = createViewHolder(convertView);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            boolean myMsg = chatMessage.getIsme() ;//Just a dummy check
+            //to simulate whether it me or other sender
+            setAlignment(holder, myMsg);
+            holder.txtMessage.setText(chatMessage.getMessage());
+            holder.txtInfo.setText(chatMessage.getDate());
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            convertView = vi.inflate(R.layout.map_chat_message, null);
+            Location loc= new Location("GPS_PROVIDER");
+            loc.setLatitude(47.113329);
+            loc.setLongitude(1.077769);
+            MapHolder holder = createMapHolder(convertView, loc);
+            holder.txtInfo.setText(chatMessage.getDate());
+            convertView.setTag(holder);
         }
-
-        boolean myMsg = chatMessage.getIsme() ;//Just a dummy check
-        //to simulate whether it me or other sender
-        setAlignment(holder, myMsg);
-        holder.txtMessage.setText(chatMessage.getMessage());
-        holder.txtInfo.setText(chatMessage.getDate());
-
         return convertView;
     }
 
@@ -83,7 +93,7 @@ public class ChatAdapter extends BaseAdapter {
 
     private void setAlignment(ViewHolder holder, boolean isMe) {
         if (!isMe) {
-            holder.contentWithBG.setBackgroundResource(R.drawable.in_msg_mg);
+            holder.contentWithBG.setBackgroundResource(R.drawable.in_msg_bg);
 
             LinearLayout.LayoutParams layoutParams =
                     (LinearLayout.LayoutParams) holder.contentWithBG.getLayoutParams();
@@ -132,6 +142,18 @@ public class ChatAdapter extends BaseAdapter {
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
         return holder;
+    }
+
+    private MapHolder createMapHolder(View v, Location loc) {
+        MapHolder holder = new MapHolder();
+        holder.mapView = new MapView(this.context,v, loc);
+        holder.txtInfo = (TextView) v.findViewById(R.id.txtInfoMap);
+        return holder;
+    }
+
+    private static class MapHolder {
+        public MapView mapView;
+        public TextView txtInfo;
     }
 
     private static class ViewHolder {
