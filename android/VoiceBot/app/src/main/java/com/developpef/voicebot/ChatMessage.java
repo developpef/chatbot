@@ -1,5 +1,7 @@
 package com.developpef.voicebot;
 
+import org.json.JSONObject;
+
 /**
  * Created by frup43821 on 26/09/2017.
  */
@@ -11,6 +13,7 @@ public class ChatMessage {
     private Long userId;
     private String dateTime;
     private boolean isMap;
+    private JSONObject data;
 
     public long getId() {
         return id;
@@ -52,5 +55,13 @@ public class ChatMessage {
 
     public void setMap(boolean map) {
         isMap = map;
+    }
+
+    public JSONObject getData() {
+        return data;
+    }
+
+    public void setData(JSONObject data) {
+        this.data = data;
     }
 }

@@ -69,7 +69,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void displayMessage(ChatMessage message) {
-        adapter.add(message);
+        if(message.isMap()) {
+            adapter.addMap(message);
+        } else {
+            adapter.add(message);
+        }
         adapter.notifyDataSetChanged();
         scroll();
     }
@@ -128,21 +132,37 @@ public class MainActivity extends AppCompatActivity {
                         client.post(this, "https://run.recast.ai/developpef-chatbot", entity, "application/json", new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                String intentResp = "", messageTxt = "";
+                                JSONObject data = null;
                                 try {
-                                    //txtSpeechInput.setText(response.getString("result"));
-                                    String intentResp = response.getString("intent");
-                                    ChatMessage chatMessage = new ChatMessage();
-                                    chatMessage.setId(122);//dummy
-                                    chatMessage.setMessage(response.getString("result"));
-                                    chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-                                    chatMessage.setMe(false);
-                                    chatMessage.setMap(intentResp!=null?intentResp.equals("c8y_geoloc"):false);
-                                    displayMessage(chatMessage);
+                                    intentResp = response.getString("intent");
                                 } catch (JSONException e) {
                                     Toast.makeText(getApplicationContext(),
                                             "jsonexce:" + e.getMessage(),
                                             Toast.LENGTH_SHORT).show();
                                 }
+                                try {
+                                    messageTxt = response.getString("result");
+                                } catch (JSONException e) {
+                                    Toast.makeText(getApplicationContext(),
+                                            "jsonexce:" + e.getMessage(),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                                try {
+                                    data = response.getJSONObject("data");
+                                } catch (JSONException e) {
+                                    Toast.makeText(getApplicationContext(),
+                                            "jsonexce:" + e.getMessage(),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                                ChatMessage chatMessage = new ChatMessage();
+                                chatMessage.setId(122);//dummy
+                                chatMessage.setMessage(messageTxt);
+                                chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                                chatMessage.setMe(false);
+                                chatMessage.setMap(intentResp!=null?intentResp.equals("c8y_geoloc"):false);
+                                chatMessage.setData(data);
+                                displayMessage(chatMessage);
                             }
                         });
                     }
