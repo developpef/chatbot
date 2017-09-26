@@ -43,6 +43,7 @@ function replyRaw (text, callback) {
 				(_err, _res, body) => {
 					if(_err) {
 						varcontent = 'Il y a eu un problème...'
+						callback(null, { result: varcontent, intent : intent.slug })
 					} else {
 						body = JSON.parse(body)
 						console.log("C8Y resp:"+body)
@@ -51,8 +52,28 @@ function replyRaw (text, callback) {
 						} else {
 							varcontent = 'Je n\'ai rien trouvé!'
 						}
+						var assetId = body.managedObject.id;
+						
+						//recherche de localisation
+						request(
+						{
+							url:'https://pefgfi.cumulocity.com/event/events?source='+assetId+'&type=c8y_LocationUpdate&dateFrom=2017-09-26', 
+							headers : {"Authorization" : "Basic cGF1bC1lbW1hbnVlbC5mYWlkaGVyYmVAZ2ZpLmZyOiFhbjEyUEVG"}
+						},
+						(_err, _res, body2) => {
+							var dataResp = {};
+							if(_err) {
+								varcontent = 'Il y a eu un problème...'
+							} else {
+								body2 = JSON.parse(body2)
+								console.log("C8Y resp:"+body2)
+								if(body2.events) {
+									dataResp = body2.events[0].c8y_Position
+								}
+							}
+							callback(null, { result: varcontent, intent : intent.slug, data : dataResp })
+						  })
 					}
-					callback(null, { result: varcontent, intent : intent.slug })
 				  })
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
