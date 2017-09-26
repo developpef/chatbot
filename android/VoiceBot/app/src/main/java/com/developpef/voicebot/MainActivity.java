@@ -5,9 +5,13 @@ import android.content.Intent;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,7 +23,9 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
@@ -29,20 +35,20 @@ import static com.developpef.voicebot.R.id.btnSpeak;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView txtSpeechInput;
     private ImageButton btnSpeak;
     private final int REQ_CODE_SPEECH_INPUT = 100;
+
+    /**
+     * chat
+     */
+    private ListView messagesContainer;
+    private ChatAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
-
-        // hide the action bar
-        //getActionBar().hide();
-
         btnSpeak.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -50,6 +56,25 @@ public class MainActivity extends AppCompatActivity {
                 promptSpeechInput();
             }
         });
+
+        // chat
+        initControls();
+    }
+
+    private void initControls() {
+        messagesContainer = (ListView) findViewById(R.id.messagesContainer);
+        adapter = new ChatAdapter(this, new ArrayList<ChatMessage>());
+        messagesContainer.setAdapter(adapter);
+    }
+
+    public void displayMessage(ChatMessage message) {
+        adapter.add(message);
+        adapter.notifyDataSetChanged();
+        scroll();
+    }
+
+    private void scroll() {
+        messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
 
     /**
@@ -84,29 +109,20 @@ public class MainActivity extends AppCompatActivity {
 
                         ArrayList<String> result = data
                                 .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        txtSpeechInput.setText(result.get(0));
+                        String firstExtra = result.get(0);
+                        //txtSpeechInput.setText(result.get(0));
+                        ChatMessage chatMessage = new ChatMessage();
+                        chatMessage.setId(122);//dummy
+                        chatMessage.setMessage(firstExtra);
+                        chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                        chatMessage.setMe(true);
+                        displayMessage(chatMessage);
 
                         AsyncHttpClient client = new AsyncHttpClient();
                         client.addHeader("Authorization", "Token ed665077a9496e5fafc6a49f065bf225");
                         JSONObject jsonParams = new JSONObject();
-                        jsonParams.put("text", result.get(0));
+                        jsonParams.put("text", firstExtra);
                         StringEntity entity = new StringEntity(jsonParams.toString());
-                        /*client.post(this, "https://run.recast.ai/developpef-chatbot", entity, "application/json", new AsyncHttpResponseHandler() {
-                            @Override
-                            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                                Toast.makeText(getApplicationContext(),
-                                        "fail:" + statusCode,
-                                        Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                                Toast.makeText(getApplicationContext(),
-                                        "success:" + new String(responseBody),
-                                        Toast.LENGTH_SHORT).show();
-
-                            }
-                        });*/
 
                         client.post(this, "https://run.recast.ai/developpef-chatbot", entity, "application/json", new JsonHttpResponseHandler() {
                             @Override
@@ -115,7 +131,13 @@ public class MainActivity extends AppCompatActivity {
                                     /*Toast.makeText(getApplicationContext(),
                                             "success:" + response.getString("result"),
                                             Toast.LENGTH_SHORT).show();*/
-                                    txtSpeechInput.setText(response.getString("result"));
+                                    //txtSpeechInput.setText(response.getString("result"));
+                                    ChatMessage chatMessage = new ChatMessage();
+                                    chatMessage.setId(122);//dummy
+                                    chatMessage.setMessage(response.getString("result"));
+                                    chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                                    chatMessage.setMe(false);
+                                    displayMessage(chatMessage);
                                 } catch (JSONException e) {
                                     Toast.makeText(getApplicationContext(),
                                             "jsonexce:" + e.getMessage(),
@@ -137,8 +159,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 }
