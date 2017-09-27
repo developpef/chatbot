@@ -2,6 +2,8 @@ package com.developpef.voicebot;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
@@ -12,6 +14,10 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -79,7 +85,26 @@ public class ChatAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
+        holder.data = chatMessage.getData();
+        holder.txtMessage.setTag(chatMessage.getData());
         holder.txtMessage.setText(Html.fromHtml(chatMessage.getMessage(), Html.FROM_HTML_MODE_COMPACT));
+        holder.txtMessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String posStr = "";
+                try {
+                    JSONObject data = (JSONObject)v.getTag();
+                    posStr = data.getDouble("lat")+","+data.getDouble("lng");
+                } catch (JSONException e) {
+                    //
+                }
+                // Creates an Intent that will load a map of San Francisco
+                Uri gmmIntentUri = Uri.parse("geo:"+posStr+"?q="+posStr);
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                context.startActivity(mapIntent);
+            }
+        });
         holder.txtInfo.setText(chatMessage.getDate());
         if(chatMessage.isMap()) {
             holder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.maps, 0, 0, 0);
@@ -161,5 +186,6 @@ public class ChatAdapter extends BaseAdapter {
         public TextView txtInfo;
         public LinearLayout content;
         public LinearLayout contentWithBG;
+        public JSONObject data;
     }
 }

@@ -156,7 +156,8 @@ public class MainActivity extends AppCompatActivity {
 
                                 ChatMessage chatMessage = new ChatMessage();
                                 chatMessage.setId(122);//dummy
-                                chatMessage.setMessage(" <a href=\"https://www.google.fr/maps/?q=loc:"+posStr+"\">Voir une carte</a>");
+                                //chatMessage.setMessage(" <a href=\"https://www.google.fr/maps/?q=loc:"+posStr+"\">Voir une carte</a>");
+                                chatMessage.setMessage(" <u>Voir une carte</u>");
                                 chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                                 chatMessage.setMe(false);
                                 chatMessage.setMap(intentResp!=null?intentResp.equals("c8y_geoloc"):false);
