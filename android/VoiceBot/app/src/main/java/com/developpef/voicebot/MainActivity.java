@@ -2,24 +2,18 @@ package com.developpef.voicebot;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.net.Uri;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,8 +25,6 @@ import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
-
-import static com.developpef.voicebot.R.id.btnSpeak;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -99,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     getString(R.string.speech_not_supported),
                     Toast.LENGTH_SHORT).show();
         }
+        //onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
     }
 
     /**
@@ -111,11 +104,12 @@ public class MainActivity extends AppCompatActivity {
             switch (requestCode) {
                 case REQ_CODE_SPEECH_INPUT: {
                     if (resultCode == RESULT_OK && null != data) {
+                    //if (resultCode == RESULT_OK ) {
 
                         ArrayList<String> result = data
                                 .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                         String firstExtra = result.get(0);
-                        //txtSpeechInput.setText(result.get(0));
+                        //String firstExtra = "où est la caisse 2";
                         ChatMessage chatMessage = new ChatMessage();
                         chatMessage.setId(122);//dummy
                         chatMessage.setMessage(firstExtra);
@@ -148,21 +142,33 @@ public class MainActivity extends AppCompatActivity {
                                             "jsonexce:" + e.getMessage(),
                                             Toast.LENGTH_SHORT).show();
                                 }
+
+                                String posStr = "";
                                 try {
                                     data = response.getJSONObject("data");
+                                    posStr = data.getDouble("lat")+","+data.getDouble("lng");
                                 } catch (JSONException e) {
                                     Toast.makeText(getApplicationContext(),
                                             "jsonexce:" + e.getMessage(),
                                             Toast.LENGTH_SHORT).show();
                                 }
+
+
                                 ChatMessage chatMessage = new ChatMessage();
                                 chatMessage.setId(122);//dummy
-                                chatMessage.setMessage(messageTxt);
+                                chatMessage.setMessage(" <a href=\"https://www.google.fr/maps/?q=loc:"+posStr+"\">Voir une carte</a>");
                                 chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                                 chatMessage.setMe(false);
                                 chatMessage.setMap(intentResp!=null?intentResp.equals("c8y_geoloc"):false);
                                 chatMessage.setData(data);
                                 displayMessage(chatMessage);
+
+                                // Creates an Intent that will load a map of San Francisco
+                                Uri gmmIntentUri = Uri.parse("geo:"+posStr+"?q="+posStr);
+                                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                                mapIntent.setPackage("com.google.android.apps.maps");
+                                startActivity(mapIntent);
+
                             }
                         });
                     }

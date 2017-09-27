@@ -2,7 +2,8 @@ package com.developpef.voicebot;
 
 import android.app.Activity;
 import android.content.Context;
-import android.location.Location;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +12,6 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.json.JSONException;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -71,77 +70,21 @@ public class ChatAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        /*ChatMessage chatMessage = getItem(position);
-        int type = getItemViewType(position);
-        if(type==TYPE_TXT) {
-            ViewHolder holder;
-
-            if (convertView == null) {
-                convertView = vi.inflate(R.layout.list_item_chat_message, null, false);
-                holder = createViewHolder(convertView);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            boolean myMsg = chatMessage.getIsme() ;//Just a dummy check
-            //to simulate whether it me or other sender
-            setAlignment(holder, myMsg);
-            holder.txtMessage.setText(chatMessage.getMessage());
-            holder.txtInfo.setText(chatMessage.getDate());
-        } else {
-            convertView = vi.inflate(R.layout.map_chat_message, null, false);
-            Location loc= new Location("GPS_PROVIDER");
-            try {
-                loc.setLatitude(chatMessage.getData().getDouble("lat"));
-                loc.setLongitude(chatMessage.getData().getDouble("lng"));
-            } catch(JSONException e) {
-                loc.setLatitude(47.113329);
-                loc.setLongitude(1.077769);
-            }
-            MapHolder holder = createMapHolder(convertView, loc);
-            holder.txtInfo.setText(chatMessage.getDate());
-            convertView.setTag(holder);
-        }
-        return convertView;*/
-
         ChatMessage chatMessage = getItem(position);
         ViewHolder holder;
         if (convertView == null) {
-            if(chatMessage.isMap()) {
-                convertView = vi.inflate(R.layout.map_chat_message, null, false);
-                Location loc= new Location("GPS_PROVIDER");
-                try {
-                    loc.setLatitude(chatMessage.getData().getDouble("lat"));
-                    loc.setLongitude(chatMessage.getData().getDouble("lng"));
-                } catch(JSONException e) {
-                    loc.setLatitude(47.113329);
-                    loc.setLongitude(1.077769);
-                }
-                holder = createMapHolder(convertView, loc);
-            } else {
-                convertView = vi.inflate(R.layout.list_item_chat_message, null, false);
-                holder = createViewHolder(convertView);
-            }
+            convertView = vi.inflate(R.layout.list_item_chat_message, null, false);
+            holder = createViewHolder(convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.txtMessage.setText(chatMessage.getMessage());
+        holder.txtMessage.setText(Html.fromHtml(chatMessage.getMessage(), Html.FROM_HTML_MODE_COMPACT));
         holder.txtInfo.setText(chatMessage.getDate());
         if(chatMessage.isMap()) {
-            Location loc= new Location("GPS_PROVIDER");
-            try {
-                loc.setLatitude(chatMessage.getData().getDouble("lat"));
-                loc.setLongitude(chatMessage.getData().getDouble("lng"));
-            } catch(JSONException e) {
-                loc.setLatitude(47.113329);
-                loc.setLongitude(1.077769);
-            }
-            ((MapHolder)holder).mapView = new MapView(this.context,convertView, loc);
-        } else if(holder instanceof MapHolder) {
-            ((MapHolder)holder).mapView = null;
+            holder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.maps, 0, 0, 0);
         }
+
         setAlignment(holder, chatMessage.getIsme());
         return convertView;
     }
@@ -206,24 +149,11 @@ public class ChatAdapter extends BaseAdapter {
     private ViewHolder createViewHolder(View v) {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
+        holder.txtMessage.setMovementMethod(LinkMovementMethod.getInstance());
         holder.content = (LinearLayout) v.findViewById(R.id.content);
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
         return holder;
-    }
-
-    private MapHolder createMapHolder(View v, Location loc) {
-        MapHolder holder = new MapHolder();
-        holder.mapView = new MapView(this.context,v, loc);
-        holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
-        holder.content = (LinearLayout) v.findViewById(R.id.content);
-        holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
-        holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
-        return holder;
-    }
-
-    private static class MapHolder extends ViewHolder {
-        public MapView mapView;
     }
 
     private static class ViewHolder {
