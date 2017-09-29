@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
      * Showing google speech input dialog
      * */
     private void promptSpeechInput() {
-        /*Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.speech_not_supported),
                     Toast.LENGTH_SHORT).show();
-        }*/
-        onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
+        }
+        //onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
     }
 
     /**
@@ -100,13 +100,13 @@ public class MainActivity extends AppCompatActivity {
         try {
             switch (requestCode) {
                 case REQ_CODE_SPEECH_INPUT: {
-                    //if (resultCode == RESULT_OK && null != data) {
-                    if (resultCode == RESULT_OK ) {
+                    if (resultCode == RESULT_OK && null != data) {
+                    //if (resultCode == RESULT_OK ) {
 
-                        /*ArrayList<String> result = data
+                        ArrayList<String> result = data
                                 .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        String firstExtra = result.get(0);*/
-                        String firstExtra = "où est la caisse 2";
+                        String firstExtra = result.get(0);
+                        //String firstExtra = "où est la caisse 2";
                         startConversation(firstExtra);
                     }
                     break;
