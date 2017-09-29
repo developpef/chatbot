@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
      * Showing google speech input dialog
      * */
     private void promptSpeechInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        /*Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
@@ -87,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.speech_not_supported),
                     Toast.LENGTH_SHORT).show();
-        }
-        //onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
+        }*/
+        onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
     }
 
     /**
@@ -100,13 +99,13 @@ public class MainActivity extends AppCompatActivity {
         try {
             switch (requestCode) {
                 case REQ_CODE_SPEECH_INPUT: {
-                    if (resultCode == RESULT_OK && null != data) {
-                    //if (resultCode == RESULT_OK ) {
+                    //if (resultCode == RESULT_OK && null != data) {
+                    if (resultCode == RESULT_OK ) {
 
-                        ArrayList<String> result = data
+                        /*ArrayList<String> result = data
                                 .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        String firstExtra = result.get(0);
-                        //String firstExtra = "où est la caisse 2";
+                        String firstExtra = result.get(0);*/
+                        String firstExtra = "où est la caisse 2";
                         startConversation(firstExtra);
                     }
                     break;
@@ -154,16 +153,18 @@ public class MainActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 }
 
-                String posStr = "";
-                try {
-                    data = response.getJSONObject("data");
-                    posStr = data.getDouble("lat")+","+data.getDouble("lng");
-                } catch (JSONException e) { }
+
+                double lat = 0.0, lng = 0.0;
 
                 ChatMessage chatMessage = new ChatMessage();
                 chatMessage.setId(122);//dummy
                 if(intentResp!=null && intentResp.equals("c8y_geoloc")) {
-                    chatMessage.setMessage(" <u>Voir une carte</u>");
+                    try {
+                        data = response.getJSONObject("data");
+                        lat = data.getDouble("lat");
+                        lng = data.getDouble("lng");
+                    } catch (JSONException e) { }
+                    chatMessage.setMessage(" <u>Voici une carte</u>");
                     chatMessage.setMap(true);
                 } else {
                     chatMessage.setMessage(messageTxt);
@@ -174,11 +175,8 @@ public class MainActivity extends AppCompatActivity {
                 displayMessage(chatMessage);
 
                 if(chatMessage.isMap()) {
-                    // Creates an Intent that will load a map
-                    Uri gmmIntentUri = Uri.parse("geo:" + posStr + "?q=" + posStr);
-                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                    mapIntent.setPackage("com.google.android.apps.maps");
-                    startActivity(mapIntent);
+                    //startActivity(MapActivityIntentFactory.startGoogleMaps(lat,lng));
+                    startActivity(MapActivityIntentFactory.startMapBox(MainActivity.this, lat, lng));
                 }
             }
         });

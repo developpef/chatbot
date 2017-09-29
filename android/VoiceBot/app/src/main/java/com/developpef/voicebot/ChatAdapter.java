@@ -83,17 +83,14 @@ public class ChatAdapter extends BaseAdapter {
         holder.txtMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String posStr = "";
                 try {
                     ChatMessage msg = (ChatMessage)v.getTag();
                     if(msg.isMap()) {
                         JSONObject data = msg.getData();
-                        posStr = data.getDouble("lat") + "," + data.getDouble("lng");
-                        // Creates an Intent that will load a map
-                        Uri gmmIntentUri = Uri.parse("geo:"+posStr+"?q="+posStr);
-                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                        mapIntent.setPackage("com.google.android.apps.maps");
-                        context.startActivity(mapIntent);
+                        double lat = data.getDouble("lat");
+                        double lng = data.getDouble("lng");
+                        //context.startActivity(MapActivityIntentFactory.startGoogleMaps(lat,lng));
+                        context.startActivity(MapActivityIntentFactory.startMapBox(context, lat, lng));
                     }
                 } catch (JSONException e) {
                     //
