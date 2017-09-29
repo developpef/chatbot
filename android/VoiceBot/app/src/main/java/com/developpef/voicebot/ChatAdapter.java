@@ -14,13 +14,11 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.TreeSet;
 
 /**
  * Created by frup43821 on 26/09/2017.
@@ -31,9 +29,6 @@ public class ChatAdapter extends BaseAdapter {
     private final List<ChatMessage> chatMessages;
     private Activity context;
     private LayoutInflater vi;
-    private static final int TYPE_TXT = 0;
-    private static final int TYPE_MAP = 1;
-    private TreeSet mMapsSet = new TreeSet();
 
     public ChatAdapter(Activity context, List<ChatMessage> chatMessages) {
         this.context = context;
@@ -48,16 +43,6 @@ public class ChatAdapter extends BaseAdapter {
         } else {
             return 0;
         }
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return mMapsSet.contains(position) ? TYPE_MAP : TYPE_TXT;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 2;
     }
 
     @Override
@@ -85,30 +70,36 @@ public class ChatAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
+        holder.txtInfo.setText(chatMessage.getDate());
         holder.data = chatMessage.getData();
-        holder.txtMessage.setTag(chatMessage.getData());
         holder.txtMessage.setText(Html.fromHtml(chatMessage.getMessage(), Html.FROM_HTML_MODE_COMPACT));
+        if(chatMessage.isMap()) {
+            holder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.maps, 0, 0, 0);
+        } else {
+            holder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        }
+
+        holder.txtMessage.setTag(chatMessage);
         holder.txtMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String posStr = "";
                 try {
-                    JSONObject data = (JSONObject)v.getTag();
-                    posStr = data.getDouble("lat")+","+data.getDouble("lng");
+                    ChatMessage msg = (ChatMessage)v.getTag();
+                    if(msg.isMap()) {
+                        JSONObject data = msg.getData();
+                        posStr = data.getDouble("lat") + "," + data.getDouble("lng");
+                        // Creates an Intent that will load a map
+                        Uri gmmIntentUri = Uri.parse("geo:"+posStr+"?q="+posStr);
+                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                        mapIntent.setPackage("com.google.android.apps.maps");
+                        context.startActivity(mapIntent);
+                    }
                 } catch (JSONException e) {
                     //
                 }
-                // Creates an Intent that will load a map of San Francisco
-                Uri gmmIntentUri = Uri.parse("geo:"+posStr+"?q="+posStr);
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                mapIntent.setPackage("com.google.android.apps.maps");
-                context.startActivity(mapIntent);
             }
         });
-        holder.txtInfo.setText(chatMessage.getDate());
-        if(chatMessage.isMap()) {
-            holder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.maps, 0, 0, 0);
-        }
 
         setAlignment(holder, chatMessage.getIsme());
         return convertView;
@@ -116,15 +107,6 @@ public class ChatAdapter extends BaseAdapter {
 
     public void add(ChatMessage message) {
         chatMessages.add(message);
-    }
-
-    public void addMap(ChatMessage message) {
-        chatMessages.add(message);
-        mMapsSet.add(chatMessages.size() - 1);
-    }
-
-    public void add(List<ChatMessage> messages) {
-        chatMessages.addAll(messages);
     }
 
     private void setAlignment(ViewHolder holder, boolean isMe) {

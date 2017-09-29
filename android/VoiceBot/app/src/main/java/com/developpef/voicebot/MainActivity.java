@@ -18,6 +18,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,11 +62,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void displayMessage(ChatMessage message) {
-        if(message.isMap()) {
-            adapter.addMap(message);
-        } else {
-            adapter.add(message);
-        }
+        adapter.add(message);
         adapter.notifyDataSetChanged();
         scroll();
     }
@@ -78,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
      * Showing google speech input dialog
      * */
     private void promptSpeechInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        /*Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
@@ -90,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.speech_not_supported),
                     Toast.LENGTH_SHORT).show();
-        }
-        //onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
+        }*/
+        onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
     }
 
     /**
@@ -103,75 +100,14 @@ public class MainActivity extends AppCompatActivity {
         try {
             switch (requestCode) {
                 case REQ_CODE_SPEECH_INPUT: {
-                    if (resultCode == RESULT_OK && null != data) {
-                    //if (resultCode == RESULT_OK ) {
+                    //if (resultCode == RESULT_OK && null != data) {
+                    if (resultCode == RESULT_OK ) {
 
-                        ArrayList<String> result = data
+                        /*ArrayList<String> result = data
                                 .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        String firstExtra = result.get(0);
-                        //String firstExtra = "où est la caisse 2";
-                        ChatMessage chatMessage = new ChatMessage();
-                        chatMessage.setId(122);//dummy
-                        chatMessage.setMessage(firstExtra);
-                        chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-                        chatMessage.setMe(true);
-                        displayMessage(chatMessage);
-
-                        AsyncHttpClient client = new AsyncHttpClient();
-                        client.addHeader("Authorization", "Token ed665077a9496e5fafc6a49f065bf225");
-                        JSONObject jsonParams = new JSONObject();
-                        jsonParams.put("text", firstExtra);
-                        StringEntity entity = new StringEntity(jsonParams.toString());
-
-                        client.post(this, "https://run.recast.ai/developpef-chatbot", entity, "application/json", new JsonHttpResponseHandler() {
-                            @Override
-                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                                String intentResp = "", messageTxt = "";
-                                JSONObject data = null;
-                                try {
-                                    intentResp = response.getString("intent");
-                                } catch (JSONException e) {
-                                    Toast.makeText(getApplicationContext(),
-                                            "jsonexce:" + e.getMessage(),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                                try {
-                                    messageTxt = response.getString("result");
-                                } catch (JSONException e) {
-                                    Toast.makeText(getApplicationContext(),
-                                            "jsonexce:" + e.getMessage(),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-
-                                String posStr = "";
-                                try {
-                                    data = response.getJSONObject("data");
-                                    posStr = data.getDouble("lat")+","+data.getDouble("lng");
-                                } catch (JSONException e) {
-                                    Toast.makeText(getApplicationContext(),
-                                            "jsonexce:" + e.getMessage(),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-
-
-                                ChatMessage chatMessage = new ChatMessage();
-                                chatMessage.setId(122);//dummy
-                                //chatMessage.setMessage(" <a href=\"https://www.google.fr/maps/?q=loc:"+posStr+"\">Voir une carte</a>");
-                                chatMessage.setMessage(" <u>Voir une carte</u>");
-                                chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-                                chatMessage.setMe(false);
-                                chatMessage.setMap(intentResp!=null?intentResp.equals("c8y_geoloc"):false);
-                                chatMessage.setData(data);
-                                displayMessage(chatMessage);
-
-                                // Creates an Intent that will load a map of San Francisco
-                                Uri gmmIntentUri = Uri.parse("geo:"+posStr+"?q="+posStr);
-                                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                                mapIntent.setPackage("com.google.android.apps.maps");
-                                startActivity(mapIntent);
-
-                            }
-                        });
+                        String firstExtra = result.get(0);*/
+                        String firstExtra = "où est la caisse 2";
+                        startConversation(firstExtra);
                     }
                     break;
                 }
@@ -184,8 +120,67 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return true;
+    private void startConversation(String userInput) throws JSONException, UnsupportedEncodingException {
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setId(122);//dummy
+        chatMessage.setMessage(userInput);
+        chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+        chatMessage.setMe(true);
+        displayMessage(chatMessage);
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.addHeader("Authorization", "Token ed665077a9496e5fafc6a49f065bf225");
+        JSONObject jsonParams = new JSONObject();
+        jsonParams.put("text", userInput);
+        StringEntity entity = new StringEntity(jsonParams.toString());
+
+        client.post(this, "https://run.recast.ai/developpef-chatbot", entity, "application/json", new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                String intentResp = "", messageTxt = "";
+                JSONObject data = null;
+                try {
+                    intentResp = response.getString("intent");
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(),
+                            "jsonexce:" + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+                try {
+                    messageTxt = response.getString("result");
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(),
+                            "jsonexce:" + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                String posStr = "";
+                try {
+                    data = response.getJSONObject("data");
+                    posStr = data.getDouble("lat")+","+data.getDouble("lng");
+                } catch (JSONException e) { }
+
+                ChatMessage chatMessage = new ChatMessage();
+                chatMessage.setId(122);//dummy
+                if(intentResp!=null && intentResp.equals("c8y_geoloc")) {
+                    chatMessage.setMessage(" <u>Voir une carte</u>");
+                    chatMessage.setMap(true);
+                } else {
+                    chatMessage.setMessage(messageTxt);
+                }
+                chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                chatMessage.setMe(false);
+                chatMessage.setData(data);
+                displayMessage(chatMessage);
+
+                if(chatMessage.isMap()) {
+                    // Creates an Intent that will load a map
+                    Uri gmmIntentUri = Uri.parse("geo:" + posStr + "?q=" + posStr);
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                    mapIntent.setPackage("com.google.android.apps.maps");
+                    startActivity(mapIntent);
+                }
+            }
+        });
     }
 }
