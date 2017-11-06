@@ -171,9 +171,10 @@ public class MainActivity extends AppCompatActivity {
                 } else if(intentResp!=null && intentResp.equals("c8y_list")) {
                     StringBuilder sb = new StringBuilder("Vos objets connus :<br>");
                     try {
-                        JSONArray array = response.getJSONArray("list");
+                        data = response.getJSONObject("data");
+                        JSONArray array = data.getJSONArray("list");
                         for(int i=0; i<array.length(); i++) {
-                            sb.append(array.optJSONObject(i).getString("name")).append("<br>");
+                            sb.append(array.optJSONObject(i).getString("nom")).append("<br>");
                         }
                     } catch (JSONException e) {
                     }
