@@ -38,7 +38,7 @@ function replyRaw (text, callback) {
 			request(
 				{
 					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
-					headers : {"Authorization" : "Basic cGF1bC1lbW1hbnVlbC5mYWlkaGVyYmVAZ2ZpLmZyOiFhbjEyUEVG"}
+					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
 				},
 				(_err, _res, body) => {
 					if(_err) {
@@ -58,7 +58,7 @@ function replyRaw (text, callback) {
 						request(
 						{
 							url:'https://pefgfi.cumulocity.com/event/events?source='+assetId+'&type=c8y_LocationUpdate&dateFrom=2017-09-26', 
-							headers : {"Authorization" : "Basic cGF1bC1lbW1hbnVlbC5mYWlkaGVyYmVAZ2ZpLmZyOiFhbjEyUEVG"}
+							headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
 						},
 						(_err, _res, body2) => {
 							var dataResp = {};
@@ -75,6 +75,26 @@ function replyRaw (text, callback) {
 						  })
 					}
 				  })
+		} else if (intent.slug === 'c8y_list' && intent.confidence > 0.7) {
+			request(
+				{
+					url:'https://pefgfi.cumulocity.com//inventory/managedObjects', 
+					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
+				},
+				(_err, _res, body) => {
+					var dataResp = [];
+					if(_err) {
+						varcontent = 'Il y a eu un problème...'
+					} else {
+						body = JSON.parse(body)
+						for(var i=0; i<body.managedObjects.length; i++) {
+							if(body.managedObjects[i].c8y_SupportedMeasurements) {
+								dataResp.push({nom:body.managedObjects[i].name});
+							}
+						}
+					}
+					callback(null, { result: varcontent, intent : intent.slug, data : dataResp })
+				})
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
 			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
@@ -111,7 +131,7 @@ const replyMessage = (message, text, res) => {
 			request(
 				{
 					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
-					headers : {"Authorization" : "Basic cGF1bC1lbW1hbnVlbC5mYWlkaGVyYmVAZ2ZpLmZyOiFhbjEyUEVG"}
+					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
 				},
 				(_err, _res, body) => {
 					if(_err) {
