@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -163,9 +164,20 @@ public class MainActivity extends AppCompatActivity {
                         data = response.getJSONObject("data");
                         lat = data.getDouble("lat");
                         lng = data.getDouble("lng");
-                    } catch (JSONException e) { }
+                    } catch (JSONException e) {
+                    }
                     chatMessage.setMessage(" <u>Voici une carte</u>");
                     chatMessage.setMap(true);
+                } else if(intentResp!=null && intentResp.equals("c8y_list")) {
+                    StringBuilder sb = new StringBuilder("Vos objets connus :<br>");
+                    try {
+                        JSONArray array = response.getJSONArray("list");
+                        for(int i=0; i<array.length(); i++) {
+                            sb.append(array.optJSONObject(i).getString("name")).append("<br>");
+                        }
+                    } catch (JSONException e) {
+                    }
+                    chatMessage.setMessage(sb.toString());
                 } else {
                     chatMessage.setMessage(messageTxt);
                 }

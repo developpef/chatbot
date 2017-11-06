@@ -82,14 +82,14 @@ function replyRaw (text, callback) {
 					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
 				},
 				(_err, _res, body) => {
-					var dataResp = [];
+					var dataResp = {list:[]};
 					if(_err) {
 						varcontent = 'Il y a eu un problème...'
 					} else {
 						body = JSON.parse(body)
 						for(var i=0; i<body.managedObjects.length; i++) {
 							if(body.managedObjects[i].c8y_SupportedMeasurements) {
-								dataResp.push({nom:body.managedObjects[i].name});
+								dataResp.list.push({nom:body.managedObjects[i].name});
 							}
 						}
 					}
