@@ -101,7 +101,7 @@ function replyRaw (text, callback) {
 			converseReq.converseText(contentMessage)
 			.then(recastaiConvRes => {
 				callback(null, { result: recastaiConvRes.reply(), intent : intent.slug })
-			})
+			}).catch(err => console.error('Something went wrong', err))
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
 			  .then(res => {
@@ -160,7 +160,7 @@ const replyMessage = (message, text, res) => {
 			converseReq.converseText(contentMessage)
 			.then(recastaiConvRes => {
 				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
-			})
+			}).catch(err => console.error('Something went wrong', err))
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
 			  .then(res => {
