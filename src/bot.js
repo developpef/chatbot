@@ -156,11 +156,24 @@ const replyMessage = (message, text, res) => {
 				  })
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			/*const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.converseText(contentMessage)
 			.then(recastaiConvRes => {
 				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
-			}).catch(err => console.error('Something went wrong', err))
+			}).catch(err => console.error('Something went wrong', err))*/
+			
+			converseReq.converseText(content)
+			  .then(function(res) {
+				// ...extract the reply...
+				var reply = res.reply()
+
+				// ...and send it back to the channel
+				message.addReply([{ type: 'text', content: reply }])
+				message.reply()
+				  .then(res => console.log('message sent'))
+			  })
+			
+			
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
 			  .then(res => {
