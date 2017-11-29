@@ -156,8 +156,8 @@ const replyMessage = (message, text, res) => {
 				  })
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-			/*const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			converseReq.converseText(contentMessage)
+			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			/*converseReq.converseText(contentMessage)
 			.then(recastaiConvRes => {
 				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
 			}).catch(err => console.error('Something went wrong', err))*/
