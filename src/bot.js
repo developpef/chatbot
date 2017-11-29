@@ -19,7 +19,7 @@ export const bot = (body, response, callback) => {
 function replyRaw (text, callback) {
   const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
   const content = text
-	console.log("content:"+content)
+	console.log("content2:"+content)
   recastaiReq.analyseText(content)
   .then(recastaiRes => {
 	var varcontent = 'Je ne comprends pas...'
@@ -27,7 +27,7 @@ function replyRaw (text, callback) {
 	// get the intent detected
     var intent = recastaiRes.intent()
 	if(intent) {
-		console.log("intent:"+intent.slug+"/"+intent.confidence)
+		console.log("intent2:"+intent.slug+"/"+intent.confidence)
 		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
 			var asset = recastaiRes.get('asset-type').raw
 			console.log("asset:"+asset)
@@ -103,7 +103,7 @@ function replyRaw (text, callback) {
 				callback(null, { result: recastaiConvRes.reply(), intent : intent.slug })
 			})*/
 			const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			converseReq.dialog({'type': 'text', content: contentMessage}, { conversationId: 'CONVERSATION_ID' })
+			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
 			  .then(res => {
 				console.log("conv reply2 : "+res.messages)
 				// Do your code
@@ -162,7 +162,7 @@ const replyMessage = (message, text, res) => {
 				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
 			})*/
 			const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			converseReq.dialog({'type': 'text', content: contentMessage}, { conversationId: 'CONVERSATION_ID' })
+			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
 			  .then(res => {
 				console.log("conv reply : "+res.messages)
 				// Do your code
