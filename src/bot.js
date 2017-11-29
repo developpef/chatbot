@@ -171,7 +171,7 @@ const replyMessage = (message, text, res) => {
 				message.addReply([{ type: 'text', content: reply }])
 				message.reply()
 				  .then(res => console.log('message sent'))
-			  })
+			  }).catch(err => console.error('Something went wrong', err))
 			
 			
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
