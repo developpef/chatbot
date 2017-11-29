@@ -11,7 +11,7 @@ export const bot = (body, response, callback) => {
   } else if (body.text) {
     // pour gérer les appels par API REST en direct
 	replyRaw(body.text, callback)
-  } else {
+  } else { 
     callback('Requete vide?!') 
   }
 }
