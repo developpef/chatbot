@@ -97,11 +97,18 @@ function replyRaw (text, callback) {
 				})
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			/*const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.converseText(content)
 			.then(recastaiConvRes => {
 				callback(null, { result: recastaiConvRes.reply(), intent : intent.slug })
-			})
+			})*/
+			const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			converseReq.dialog({'type': 'text', content: contentMessage}, { conversationId: 'CONVERSATION_ID' })
+			  .then(res => {
+				console.log("conv reply2 : "+res.messages)
+				// Do your code
+			  })
+			  .catch(err => console.error('Something went wrong', err))
 		}
 	} else {
 		callback(null, { result: varcontent, intent : 'null' })
@@ -111,9 +118,9 @@ function replyRaw (text, callback) {
 
 const replyMessage = (message, text, res) => {
   const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-  const content = message.content
-	console.log("content:"+content)
-  recastaiReq.analyseText(content)
+  const contentMessage = message.content
+	console.log("content:"+contentMessage)
+  recastaiReq.analyseText(contentMessage)
   .then(recastaiRes => {
 	var varcontent = 'Je ne comprends pas...'
 	
@@ -149,11 +156,18 @@ const replyMessage = (message, text, res) => {
 				  })
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			/*const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.converseText(content)
 			.then(recastaiConvRes => {
 				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
-			})
+			})*/
+			const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			converseReq.dialog({'type': 'text', content: contentMessage}, { conversationId: 'CONVERSATION_ID' })
+			  .then(res => {
+				console.log("conv reply : "+res.messages)
+				// Do your code
+			  })
+			  .catch(err => console.error('Something went wrong', err))
 		}
 	} else {
 		return message.reply([{ type: 'text', content: varcontent }]).then()
