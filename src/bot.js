@@ -171,6 +171,7 @@ const replyMessage = (message, text, res) => {
 				message.addReply([{ type: 'text', content: reply }])
 				message.reply()
 				  .then(res => console.log('message sent'))
+				  .catch(err => console.error('Something went wrong2', err))
 			  }).catch(err => console.error('Something went wrong', err))
 			
 			
