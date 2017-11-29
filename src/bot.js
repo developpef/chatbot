@@ -162,7 +162,7 @@ const replyMessage = (message, text, res) => {
 				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
 			}).catch(err => console.error('Something went wrong', err))*/
 			
-			converseReq.converseText(content)
+			converseReq.converseText(contentMessage)
 			  .then(function(res) {
 				// ...extract the reply...
 				var reply = res.reply()
