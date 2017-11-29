@@ -18,9 +18,9 @@ export const bot = (body, response, callback) => {
 
 function replyRaw (text, callback) {
   const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-  const content = text
-	console.log("content2:"+content)
-  recastaiReq.analyseText(content)
+  const contentMessage = text
+	console.log("content2:"+contentMessage)
+  recastaiReq.analyseText(contentMessage)
   .then(recastaiRes => {
 	var varcontent = 'Je ne comprends pas...'
 	
