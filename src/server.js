@@ -26,7 +26,7 @@ app.use('/', (request, response) => {
 });
 
 // Chatfuel proxy
-app.post('/chatfuel', (req, res) => {
+app.get('/chatfuel', (req, res) => {
    const query = url.parse(req.url, true).query;
     const userId = query['chatfuel user id'];
     const userMessage = query['user_message'];
