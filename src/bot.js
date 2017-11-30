@@ -7,8 +7,8 @@ export const bot = (body, response, callback) => {
 
   if (body.message) {
 	// pour gérer les appels par Slack
-    //client.connect.handleMessage({ body }, response, replyMessage)
-	replyMessage2({ body }, callback)
+    client.connect.handleMessage({ body }, response, replyMessage2)
+	//replyMessage2({ body }, callback)
   } else if (body.text) {
     // pour gérer les appels par API REST en direct
 	replyRaw(body.text, callback)
@@ -16,10 +16,10 @@ export const bot = (body, response, callback) => {
     callback('Requete vide?!') 
   }
 }
-function replyMessage2(message, callback) {
+function replyMessage2(message) {
 	const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
   const contentMessage = message.content
-	console.log("content:"+contentMessage)
+	console.log("content2:"+contentMessage)
   recastaiReq.analyseText(contentMessage)
   .then(recastaiRes => {
 	var varcontent = 'Je ne comprends pas...'
@@ -69,15 +69,11 @@ function replyMessage2(message, callback) {
 				console.log('converse2 res', res2);
 				console.log('converse2 reply', reply);
 
-				/*/ ...and send it back to the channel
-				message.addReply([{ type: 'text', content: reply }])
-				return message.reply()
+				// ...and send it back to the channel
+				message.addReply({ type: 'text', content: reply })
+				/*return message.reply()
 				  .then(res3 => console.log('message sent'))
 				  .catch(err => console.error('Something went wrong2', err))*/
-				  
-				callback(null, { 
-					replies: [{ type: 'text', content: reply }],
-				  })
 			  })
 			  .catch(err => console.error('Something went wrong', err))
 			
