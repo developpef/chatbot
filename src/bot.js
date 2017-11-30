@@ -7,13 +7,93 @@ export const bot = (body, response, callback) => {
 
   if (body.message) {
 	// pour gérer les appels par Slack
-    client.connect.handleMessage({ body }, response, replyMessage)
+    //client.connect.handleMessage({ body }, response, replyMessage)
+	replyMessage2({ body }, callback)
   } else if (body.text) {
     // pour gérer les appels par API REST en direct
 	replyRaw(body.text, callback)
   } else { 
     callback('Requete vide?!') 
   }
+}
+function replyMessage2(message, callback) {
+	const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+  const contentMessage = message.content
+	console.log("content:"+contentMessage)
+  recastaiReq.analyseText(contentMessage)
+  .then(recastaiRes => {
+	var varcontent = 'Je ne comprends pas...'
+	
+	// get the intent detected
+    var intent = recastaiRes.intent()
+	if(intent) {
+		console.log("intent:"+intent.slug+"/"+intent.confidence)
+		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
+			var asset = recastaiRes.get('asset-type').raw
+			console.log("asset:"+asset)
+			var number = recastaiRes.get('number').raw
+			console.log("number:"+number)
+			varcontent = 'je vais chercher la '+asset+' '+number
+			 
+			request(
+				{
+					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
+					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
+				},
+				(_err, _res, body) => {
+					if(_err) {
+						varcontent = 'Il y a eu un problème...'
+					} else {
+						body = JSON.parse(body)
+						console.log("C8Y resp:"+body)
+						if(body.managedObject) {
+							varcontent = 'Juste ici : '+body.managedObject['self']+' !'
+						} else {
+							varcontent = 'Je n\'ai rien trouvé!'
+						}
+					}
+					return message.reply([{ type: 'text', content: varcontent }]).then()
+				  })
+		} else {
+			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
+			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			/*converseReq.converseText(contentMessage)
+			.then(recastaiConvRes => {
+				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
+			}).catch(err => console.error('Something went wrong', err))*/
+			
+			converseReq.converseText(contentMessage, { conversationToken: message.senderId })
+			  .then(function(res2) {
+				// ...extract the reply...
+				var reply = res2.reply()
+				console.log('converse2 res', res2);
+				console.log('converse2 reply', reply);
+
+				/*/ ...and send it back to the channel
+				message.addReply([{ type: 'text', content: reply }])
+				return message.reply()
+				  .then(res3 => console.log('message sent'))
+				  .catch(err => console.error('Something went wrong2', err))*/
+				  
+				callback(null, { 
+					replies: [{ type: 'text', content: reply }],
+				  })
+			  })
+			  .catch(err => console.error('Something went wrong', err))
+			
+			
+			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
+			  .then(res => {
+				console.log("conv reply : "+res.messages)
+				// Do your code
+			  })
+			  .catch(err => console.error('Something went wrong', err))*/
+		}
+	} else {
+		return message.reply([{ type: 'text', content: varcontent }]).then()
+	}
+  })
 }
 
 function replyRaw (text, callback) {
