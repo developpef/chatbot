@@ -171,7 +171,7 @@ const replyMessage = (message, text, res) => {
 
 				// ...and send it back to the channel
 				message.addReply([{ type: 'text', content: reply }])
-				message.reply()
+				return message.reply()
 				  .then(res3 => console.log('message sent'))
 				  .catch(err => console.error('Something went wrong2', err))
 			  }).catch(err => console.error('Something went wrong', err))
