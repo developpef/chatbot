@@ -1,5 +1,6 @@
-const express = require('express')
-const bodyParser = require('body-parser')
+const express = require('express');
+const bodyParser = require('body-parser');
+const url = require('url');
 
 // Load configuration
 require('./config')
@@ -23,6 +24,41 @@ app.use('/', (request, response) => {
     }
   })
 });
+
+// Chatfuel proxy
+app.post('/chatfuel', (req, res) => {
+   const query = url.parse(req.url, true).query;
+    const userId = query['chatfuel user id'];
+    const userMessage = query['user_message'];
+	
+	// todo
+	
+	res.json({
+          messages: [chatfuelFormat({ type: 'text', content: 'test message' })],
+        });
+});
+
+function chatfuelFormat(message) {
+  // Source : { type: 'text', content: 'XXX' }
+  // Destination { text: 'XXX' }
+  if (message.type === 'text') {
+    return { text: message.content };
+  }
+
+  // Source: { type: 'picture', content: 'URL' }
+  // Destination: { attachment: { type: 'image', payload: { url: 'URL' } } }
+  if (message.type === 'picture') {
+    return {
+      attachment: {
+        type: 'image',
+        payload: { url: message.content },
+      },
+    };
+  }
+
+  console.error('Unsupported message format: ', message.type);
+  return { text: 'An error occured' };
+}
 
 // Recast will send a post request to /errors to notify important errors
 // described in a json body
