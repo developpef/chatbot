@@ -116,7 +116,7 @@ function replyRaw (text, callback) {
   })
 }
 
-function replyMessage (message) {
+const replyMessage = (message, text, res) => {
   const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
   const contentMessage = message.content
 	console.log("content:"+contentMessage)
@@ -163,14 +163,16 @@ function replyMessage (message) {
 			}).catch(err => console.error('Something went wrong', err))*/
 			
 			converseReq.converseText(contentMessage, { conversationToken: message.senderId })
-			  .then(function(res) {
+			  .then(function(res2) {
 				// ...extract the reply...
-				var reply = res.reply()
+				var reply = res2.reply()
+				console.log('converse res', res2);
+				console.log('converse reply', reply);
 
 				// ...and send it back to the channel
 				message.addReply([{ type: 'text', content: reply }])
-				return message.reply()
-				  .then(res => res.body)
+				message.reply()
+				  .then(res3 => console.log('message sent'))
 				  .catch(err => console.error('Something went wrong2', err))
 			  }).catch(err => console.error('Something went wrong', err))
 			

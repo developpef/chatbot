@@ -22,7 +22,14 @@ app.use('/', (request, response) => {
       if (!response.headerSent) { response.status(200).json(success) }
     }
   })
-})
+});
+
+// Recast will send a post request to /errors to notify important errors
+// described in a json body
+app.post('/errors', (req, res) => {
+   console.error("error posted : "+req.body);
+   res.sendStatus(200); 
+});
 
 if (!process.env.REQUEST_TOKEN.length) {
   console.log('ERROR: process.env.REQUEST_TOKEN variable in src/config.js file is empty ! You must fill this field with the request_token of your bot before launching your bot locally')
