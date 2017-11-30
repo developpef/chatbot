@@ -66,14 +66,16 @@ function replyMessage2(message) {
 			  .then(function(res2) {
 				// ...extract the reply...
 				var reply = res2.reply()
-				console.log('converse2 res', res2);
+				//console.log('converse2 res', res2);
 				console.log('converse2 reply', reply);
 
 				// ...and send it back to the channel
-				message.addReply({ type: 'text', content: reply })
-				/*return message.reply()
+				/*message.addReply({ type: 'text', content: reply })
+				return message.reply()
 				  .then(res3 => console.log('message sent'))
 				  .catch(err => console.error('Something went wrong2', err))*/
+				  
+				  message.reply([{ type: 'text', content: reply }]).then()
 			  })
 			  .catch(err => console.error('Something went wrong', err))
 			
