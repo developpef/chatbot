@@ -62,7 +62,7 @@ function replyMessage2(message) {
 				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
 			}).catch(err => console.error('Something went wrong', err))*/
 			
-			converseReq.converseText(contentMessage, { conversationToken: message.senderId })
+			return converseReq.converseText(contentMessage, { conversationToken: message.senderId })
 			  .then(function(res2) {
 				// ...extract the reply...
 				var reply = res2.reply()
