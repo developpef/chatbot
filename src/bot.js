@@ -75,7 +75,7 @@ function replyMessage2(message) {
 				  .then(res3 => console.log('message sent'))
 				  .catch(err => console.error('Something went wrong2', err))*/
 				  
-				  message.reply([{ type: 'text', content: reply }]).then()
+				  return message.reply([{ type: 'text', content: reply }]).then()
 			  })
 			  .catch(err => console.error('Something went wrong', err))
 			
