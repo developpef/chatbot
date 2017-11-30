@@ -169,12 +169,17 @@ const replyMessage = (message, text, res) => {
 				console.log('converse res', res2);
 				console.log('converse reply', reply);
 
-				// ...and send it back to the channel
+				/*/ ...and send it back to the channel
 				message.addReply([{ type: 'text', content: reply }])
 				return message.reply()
 				  .then(res3 => console.log('message sent'))
-				  .catch(err => console.error('Something went wrong2', err))
-			  }).catch(err => console.error('Something went wrong', err))
+				  .catch(err => console.error('Something went wrong2', err))*/
+				  
+				return res.json({
+					replies: [{ type: 'text', content: reply }],
+				  })
+			  })
+			  .catch(err => console.error('Something went wrong', err))
 			
 			
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
