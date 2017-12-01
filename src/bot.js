@@ -94,7 +94,7 @@ function replyMessage2(message) {
 			  .catch(err => console.error('Something went wrong', err))*/
 		}
 	} else {
-		return message.reply([{ type: 'text', content: varcontent }]).then()
+		return message.reply([{ type: 'text', content: varcontent }])
 	}
   })
 }
