@@ -82,7 +82,10 @@ function replyMessage2(message) {
 				  
 				  return message.reply([{ type: 'text', content: reply }]).then()
 			  })
-			  .catch(err => console.error('Something went wrong', err))
+			  .catch(err => {
+				  console.error('Something went wrong', err);
+				  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
+			  })
 			
 			
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
@@ -96,6 +99,10 @@ function replyMessage2(message) {
 	} else {
 		return message.reply([{ type: 'text', content: varcontent }])
 	}
+  })
+  .catch(err => {
+	  console.error('Something went wrong', err);
+	  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
   })
 }
 
@@ -184,7 +191,10 @@ function replyRaw (text, callback) {
 			converseReq.converseText(contentMessage)
 			.then(recastaiConvRes => {
 				callback(null, { result: recastaiConvRes.reply(), intent : intent.slug })
-			}).catch(err => console.error('Something went wrong', err))
+			}).catch(err => {
+				  console.error('Something went wrong', err);
+				  callback(err,null);
+			  })
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
 			  .then(res => {
@@ -196,6 +206,10 @@ function replyRaw (text, callback) {
 	} else {
 		callback(null, { result: varcontent, intent : 'null' })
 	}
+  })
+  .catch(err => {
+	  console.error('Something went wrong', err);
+	  callback(err,null);
   })
 }
 
@@ -262,7 +276,10 @@ const replyMessage = (message, text, res) => {
 					replies: [{ type: 'text', content: reply }],
 				  })
 			  })
-			  .catch(err => console.error('Something went wrong', err))
+			  .catch(err => {
+				  console.error('Something went wrong', err);
+				  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
+			  })
 			
 			
 			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
@@ -276,5 +293,9 @@ const replyMessage = (message, text, res) => {
 	} else {
 		return message.reply([{ type: 'text', content: varcontent }]).then()
 	}
+  })
+  .catch(err => {
+	  console.error('Something went wrong', err);
+	  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
   })
 }
