@@ -29,13 +29,14 @@ function replyMessage2(message) {
 	if(intent) {
 		console.log("intent:"+intent.slug+"/"+intent.confidence)
 		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
-			var asset = recastaiRes.get('asset-type').raw
-			console.log("asset:"+asset)
-			var number = recastaiRes.get('number').raw
-			console.log("number:"+number)
-			varcontent = 'je vais chercher la '+asset+' '+number
-			 
-			request(
+			if(recastaiRes.get('asset-type')) {
+				var asset = recastaiRes.get('asset-type').raw
+				console.log("asset:"+asset)
+				var number = recastaiRes.get('number').raw
+				console.log("number:"+number)
+				varcontent = 'je vais chercher la '+asset+' '+number
+				 
+				request(
 				{
 					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
 					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
@@ -54,6 +55,10 @@ function replyMessage2(message) {
 					}
 					return message.reply([{ type: 'text', content: varcontent }]).then()
 				  })
+			} else {
+				varcontent = 'Je ne sais pas quoi chercher...';
+				return message.reply([{ type: 'text', content: varcontent }]).then()
+			}
 		} else {
 			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
 			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
