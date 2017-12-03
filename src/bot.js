@@ -1,20 +1,21 @@
-const recastai = require('recastai').default
-const client = new recastai(process.env.REQUEST_TOKEN)
-const request = require('request')
+const recastai = require('recastai').default;
+const client = new recastai(process.env.REQUEST_TOKEN);
+const request = require('request');
 
 export const bot = (body, response, callback) => {
-    console.log(body)
+    console.log(body);
 
     if (body.message) {
         // pour gérer les appels par BotConnector (Slack...)
-        client.connect.handleMessage({body}, response, replyMessage)
+        client.connect.handleMessage({body}, response, replyMessage);
     } else if (body.text) {
         // pour gérer les appels par API REST en direct
-        replyMessage(null, body.text, response)
+        callback(null, replyMessage(null, body.text, response));
     } else {
-        callback('Requete vide?!')
+        callback('Requete vide?!');
     }
-}
+};
+
 function replyMessage(message, textMessage, response) {
     const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE);
     const contentMessage = message ? message.content : textMessage;
@@ -44,7 +45,7 @@ function replyMessage(message, textMessage, response) {
                                 if (_err) {
                                     varcontent = 'Il y a eu un problème...';
                                     return message ? message.reply([{type: 'text', content: varcontent + _err}]) :
-                                            response.json(_err);
+                                            _err;
                                 } else {
                                     body = JSON.parse(body);
 
@@ -62,7 +63,7 @@ function replyMessage(message, textMessage, response) {
                                                 (_err, _res, body2) => {
                                             var dataResp = {};
                                             if (_err) {
-                                                varcontent = 'Il y a eu un problème...'
+                                                varcontent = 'Il y a eu un problème...';
                                             } else {
                                                 body2 = JSON.parse(body2);
                                                 if (body2.events && body2.events.length > 0) {
@@ -73,47 +74,47 @@ function replyMessage(message, textMessage, response) {
                                                 }
                                             }
                                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                                    response.json({result: varcontent, intent: intent.slug, data: dataResp});
-                                        })
+                                                    {result: varcontent, intent: intent.slug, data: dataResp};
+                                        });
                                     } else {
                                         varcontent = 'Je n\'ai rien trouvé!';
                                         return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                                response.json({result: varcontent, intent: intent.slug});
+                                                {result: varcontent, intent: intent.slug};
                                     }
                                 }
-                            })
+                            });
                         } else {
                             varcontent = 'Je ne sais pas quoi chercher...';
                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                    response.json({result: varcontent, intent: intent.slug, data: dataResp});
+                                    {result: varcontent, intent: intent.slug};
                         }
                     } else {
                         // on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-                        const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+                        const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE);
 
                         return converseReq.converseText(contentMessage)
                                 .then(function (res2) {
                                     // ...extract the reply...
-                                    var reply = res2.reply()
+                                    var reply = res2.reply();
                                     console.log('converse2 reply', reply);
 
                                     return message ? message.reply([{type: 'text', content: reply}]).then() :
-                                            response.json({result: varcontent, intent: 'null'});
+                                            {result: varcontent, intent: 'null'};
                                 })
                                 .catch(err => {
                                     console.error('Something went wrong', err);
                                     return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
-                                            response.json(err);
-                                })
+                                            err;
+                                });
                     }
                 } else {
                     return message ? message.reply([{type: 'text', content: varcontent}]) :
-                            response.json({result: varcontent, intent: 'null'});
+                            {result: varcontent, intent: 'null'};
                 }
             })
             .catch(err => {
                 console.error('Something went wrong', err);
                 return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
-                        response.json(err);
-            })
+                        err;
+            });
 }
