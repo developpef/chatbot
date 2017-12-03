@@ -5,6 +5,9 @@ const request = require('request');
 export const bot = (body, response, callback) => {
     console.log(body);
 
+// response, the response object from the server in case of a local run
+// callback, the object called in case of a bot hosting run
+
     if (body.message) {
         // pour gérer les appels par BotConnector (Slack...)
         client.connect.handleMessage({body}, response, replyMessage);
@@ -17,9 +20,14 @@ export const bot = (body, response, callback) => {
 };
 
 function replyMessage(message, textMessage, response) {
+    if (message) {
+        console.log("handling BotConnector message");
+    } else {
+        console.log("handling API message");
+    }
     const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE);
     const contentMessage = message ? message.content : textMessage;
-    console.log("content2:" + contentMessage);
+    console.log("content:" + contentMessage);
     recastaiReq.analyseText(contentMessage)
             .then(recastaiRes => {
                 var varcontent = 'Je ne comprends pas...';
