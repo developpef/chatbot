@@ -3,299 +3,117 @@ const client = new recastai(process.env.REQUEST_TOKEN)
 const request = require('request')
 
 export const bot = (body, response, callback) => {
-  console.log(body)
+    console.log(body)
 
-  if (body.message) {
-	// pour gérer les appels par Slack
-    client.connect.handleMessage({ body }, response, replyMessage2)
-	//replyMessage2({ body }, callback)
-  } else if (body.text) {
-    // pour gérer les appels par API REST en direct
-	replyRaw(body.text, callback)
-  } else { 
-    callback('Requete vide?!') 
-  }
+    if (body.message) {
+        // pour gérer les appels par BotConnector (Slack...)
+        client.connect.handleMessage({body}, response, replyMessage)
+    } else if (body.text) {
+        // pour gérer les appels par API REST en direct
+        replyMessage(null, body.text, response)
+    } else {
+        callback('Requete vide?!')
+    }
 }
-function replyMessage2(message) {
-	const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-  const contentMessage = message.content
-	console.log("content2:"+contentMessage)
-  recastaiReq.analyseText(contentMessage)
-  .then(recastaiRes => {
-	var varcontent = 'Je ne comprends pas...'
-	
-	// get the intent detected
-    var intent = recastaiRes.intent()
-	if(intent) {
-		console.log("intent:"+intent.slug+"/"+intent.confidence)
-		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
-			if(recastaiRes.get('asset-type')) {
-				var asset = recastaiRes.get('asset-type').raw
-				console.log("asset:"+asset)
-				var number = recastaiRes.get('number').raw
-				console.log("number:"+number)
-				varcontent = 'je vais chercher la '+asset+' '+number
-				 
-				request(
-				{
-					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
-					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
-				},
-				(_err, _res, body) => {
-					if(_err) {
-						varcontent = 'Il y a eu un problème...'
-					} else {
-						body = JSON.parse(body)
-						console.log("C8Y resp:"+body)
-						if(body.managedObject) {
-							varcontent = 'Juste ici : '+body.managedObject['self']+' !'
-						} else {
-							varcontent = 'Je n\'ai rien trouvé!'
-						}
-					}
-					return message.reply([{ type: 'text', content: varcontent }]).then()
-				  })
-			} else {
-				varcontent = 'Je ne sais pas quoi chercher...';
-				return message.reply([{ type: 'text', content: varcontent }]).then()
-			}
-		} else {
-			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			/*converseReq.converseText(contentMessage)
-			.then(recastaiConvRes => {
-				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
-			}).catch(err => console.error('Something went wrong', err))*/
-			
-			return converseReq.converseText(contentMessage, { conversationToken: message.senderId })
-			  .then(function(res2) {
-				// ...extract the reply...
-				var reply = res2.reply()
-				//console.log('converse2 res', res2);
-				console.log('converse2 reply', reply);
+function replyMessage(message, textMessage, response) {
+    const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE);
+    const contentMessage = message ? message.content : textMessage;
+    console.log("content2:" + contentMessage);
+    recastaiReq.analyseText(contentMessage)
+            .then(recastaiRes => {
+                var varcontent = 'Je ne comprends pas...';
 
-				// ...and send it back to the channel
-				/*message.addReply({ type: 'text', content: reply })
-				return message.reply()   
-				  .then(res3 => console.log('message sent'))
-				  .catch(err => console.error('Something went wrong2', err))*/
-				  
-				  return message.reply([{ type: 'text', content: reply }]).then()
-			  })
-			  .catch(err => {
-				  console.error('Something went wrong', err);
-				  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
-			  })
-			
-			
-			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
-			  .then(res => {
-				console.log("conv reply : "+res.messages)
-				// Do your code
-			  })
-			  .catch(err => console.error('Something went wrong', err))*/
-		}
-	} else {
-		return message.reply([{ type: 'text', content: varcontent }])
-	}
-  })
-  .catch(err => {
-	  console.error('Something went wrong', err);
-	  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
-  })
-}
+                // get the intent detected
+                var intent = recastaiRes.intent();
+                if (intent) {
+                    console.log("intent:" + intent.slug + "/" + intent.confidence);
+                    if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
+                        if (recastaiRes.get('asset-type') && recastaiRes.get('number')) {
+                            var asset = recastaiRes.get('asset-type').raw;
+                            console.log("asset:" + asset);
+                            var number = recastaiRes.get('number').raw;
+                            console.log("number:" + number);
+                            varcontent = 'je vais chercher la ' + asset + ' ' + number;
 
-function replyRaw (text, callback) {
-  const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-  const contentMessage = text
-	console.log("content2:"+contentMessage)
-  recastaiReq.analyseText(contentMessage)
-  .then(recastaiRes => {
-	var varcontent = 'Je ne comprends pas...'
-	
-	// get the intent detected
-    var intent = recastaiRes.intent()
-	if(intent) {
-		console.log("intent2:"+intent.slug+"/"+intent.confidence)
-		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
-			var asset = recastaiRes.get('asset-type').raw
-			console.log("asset:"+asset)
-			var number = recastaiRes.get('number').raw
-			console.log("number:"+number)
-			varcontent = 'je vais chercher la '+asset+' '+number
-			 
-			request(
-				{
-					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
-					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
-				},
-				(_err, _res, body) => {
-					if(_err) {
-						varcontent = 'Il y a eu un problème...'
-						callback(null, { result: varcontent, intent : intent.slug })
-					} else {
-						body = JSON.parse(body)
-						console.log("C8Y resp:"+body)
-						if(body.managedObject) {
-							varcontent = 'Juste ici : '+body.managedObject['self']+' !'
-						} else {
-							varcontent = 'Je n\'ai rien trouvé!'
-						}
-						var assetId = body.managedObject.id;
-						
-						//recherche de localisation
-						request(
-						{
-							url:'https://pefgfi.cumulocity.com/event/events?source='+assetId+'&type=c8y_LocationUpdate&dateFrom=2017-09-26', 
-							headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
-						},
-						(_err, _res, body2) => {
-							var dataResp = {};
-							if(_err) {
-								varcontent = 'Il y a eu un problème...'
-							} else {
-								body2 = JSON.parse(body2)
-								console.log("C8Y resp:"+body2)
-								if(body2.events) {
-									dataResp = body2.events[0].c8y_Position
-								}
-							}
-							callback(null, { result: varcontent, intent : intent.slug, data : dataResp })
-						  })
-					}
-				  })
-		} else if (intent.slug === 'c8y_list' && intent.confidence > 0.7) {
-			request(
-				{
-					url:'https://pefgfi.cumulocity.com//inventory/managedObjects', 
-					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
-				},
-				(_err, _res, body) => {
-					var dataResp = {list:[]};
-					if(_err) {
-						varcontent = 'Il y a eu un problème...'
-					} else {
-						body = JSON.parse(body)
-						for(var i=0; i<body.managedObjects.length; i++) {
-							if(body.managedObjects[i].c8y_SupportedMeasurements) {
-								dataResp.list.push({nom:body.managedObjects[i].name});
-							}
-						}
-					}
-					callback(null, { result: varcontent, intent : intent.slug, data : dataResp })
-				})
-		} else {
-			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			converseReq.converseText(contentMessage)
-			.then(recastaiConvRes => {
-				callback(null, { result: recastaiConvRes.reply(), intent : intent.slug })
-			}).catch(err => {
-				  console.error('Something went wrong', err);
-				  callback(err,null);
-			  })
-			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
-			  .then(res => {
-				console.log("conv reply2 : "+res.messages)
-				// Do your code
-			  })
-			  .catch(err => console.error('Something went wrong', err))*/
-		}
-	} else {
-		callback(null, { result: varcontent, intent : 'null' })
-	}
-  })
-  .catch(err => {
-	  console.error('Something went wrong', err);
-	  callback(err,null);
-  })
-}
+                            request(
+                                    {
+                                        url: 'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/' + asset + '_' + number,
+                                        headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
+                                    },
+                                    (_err, _res, body) => {
+                                if (_err) {
+                                    varcontent = 'Il y a eu un problème...';
+                                    return message ? message.reply([{type: 'text', content: varcontent + _err}]) :
+                                            response.status(500).json(_err);
+                                } else {
+                                    body = JSON.parse(body);
 
-const replyMessage = (message, text, res) => {
-  const recastaiReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-  const contentMessage = message.content
-	console.log("content:"+contentMessage)
-  recastaiReq.analyseText(contentMessage)
-  .then(recastaiRes => {
-	var varcontent = 'Je ne comprends pas...'
-	
-	// get the intent detected
-    var intent = recastaiRes.intent()
-	if(intent) {
-		console.log("intent:"+intent.slug+"/"+intent.confidence)
-		if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
-			var asset = recastaiRes.get('asset-type').raw
-			console.log("asset:"+asset)
-			var number = recastaiRes.get('number').raw
-			console.log("number:"+number)
-			varcontent = 'je vais chercher la '+asset+' '+number
-			 
-			request(
-				{
-					url:'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/'+asset+'_'+number, 
-					headers : {"Authorization" : "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
-				},
-				(_err, _res, body) => {
-					if(_err) {
-						varcontent = 'Il y a eu un problème...'
-					} else {
-						body = JSON.parse(body)
-						console.log("C8Y resp:"+body)
-						if(body.managedObject) {
-							varcontent = 'Juste ici : '+body.managedObject['self']+' !'
-						} else {
-							varcontent = 'Je n\'ai rien trouvé!'
-						}
-					}
-					return message.reply([{ type: 'text', content: varcontent }]).then()
-				  })
-		} else {
-			// on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
-			const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			/*converseReq.converseText(contentMessage)
-			.then(recastaiConvRes => {
-				return message.reply([{ type: 'text', content: recastaiConvRes.reply()}]).then()
-			}).catch(err => console.error('Something went wrong', err))*/
-			
-			converseReq.converseText(contentMessage, { conversationToken: message.senderId })
-			  .then(function(res2) {
-				// ...extract the reply...
-				var reply = res2.reply()
-				console.log('converse res', res2);
-				console.log('converse reply', reply);
+                                    if (body.managedObject) {
+                                        varcontent = 'Juste ici : ' + body.managedObject['self'] + ' !';
 
-				/*/ ...and send it back to the channel
-				message.addReply([{ type: 'text', content: reply }])
-				return message.reply()
-				  .then(res3 => console.log('message sent'))
-				  .catch(err => console.error('Something went wrong2', err))*/
-				  
-				return res.json({
-					replies: [{ type: 'text', content: reply }],
-				  })
-			  })
-			  .catch(err => {
-				  console.error('Something went wrong', err);
-				  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
-			  })
-			
-			
-			/*const converseReq = new recastai.build(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
-			converseReq.dialog({'type': 'text', content: contentMessage+""}, { conversationId: 'CONVERSATION_ID' })
-			  .then(res => {
-				console.log("conv reply : "+res.messages)
-				// Do your code
-			  })
-			  .catch(err => console.error('Something went wrong', err))*/
-		}
-	} else {
-		return message.reply([{ type: 'text', content: varcontent }]).then()
-	}
-  })
-  .catch(err => {
-	  console.error('Something went wrong', err);
-	  return message.reply([{ type: 'text', content: 'Something went wrong'+err }])
-  })
+                                        var assetId = body.managedObject.id;
+
+                                        //recherche de localisation
+                                        request(
+                                                {
+                                                    url: 'https://pefgfi.cumulocity.com/event/events?source=' + assetId + '&type=c8y_LocationUpdate&dateFrom=2017-09-26',
+                                                    headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
+                                                },
+                                                (_err, _res, body2) => {
+                                            var dataResp = {};
+                                            if (_err) {
+                                                varcontent = 'Il y a eu un problème...'
+                                            } else {
+                                                body2 = JSON.parse(body2);
+                                                if (body2.events && body2.events.length > 0) {
+                                                    dataResp = body2.events[0].c8y_Position;
+                                                    varcontent = 'Juste ici : https://maps.google.fr/maps?hl=fr&q=' + dataResp.lat + ',' + dataResp.lng;
+                                                } else {
+                                                    varcontent = "Je n'ai pas trouvé de position...";
+                                                }
+                                            }
+                                            return message ? message.reply([{type: 'text', content: varcontent}]).then() :
+                                                    response.status(200).json({result: varcontent, intent: intent.slug, data: dataResp});
+                                        })
+                                    } else {
+                                        varcontent = 'Je n\'ai rien trouvé!';
+                                        return message ? message.reply([{type: 'text', content: varcontent}]).then() :
+                                                response.status(200).json({result: varcontent, intent: intent.slug});
+                                    }
+                                }
+                            })
+                        } else {
+                            varcontent = 'Je ne sais pas quoi chercher...';
+                            return message ? message.reply([{type: 'text', content: varcontent}]).then() :
+                                    response.status(200).json({result: varcontent, intent: intent.slug, data: dataResp});
+                        }
+                    } else {
+                        // on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
+                        const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
+
+                        return converseReq.converseText(contentMessage, {conversationToken: message.senderId})
+                                .then(function (res2) {
+                                    // ...extract the reply...
+                                    var reply = res2.reply()
+                                    console.log('converse2 reply', reply);
+
+                                    return message ? message.reply([{type: 'text', content: reply}]).then() :
+                                            response.status(200).json({result: varcontent, intent: 'null'});
+                                })
+                                .catch(err => {
+                                    console.error('Something went wrong', err);
+                                    return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
+                                            response.status(500).json(err);
+                                })
+                    }
+                } else {
+                    return message ? message.reply([{type: 'text', content: varcontent}]) :
+                            response.status(200).json({result: varcontent, intent: 'null'});
+                }
+            })
+            .catch(err => {
+                console.error('Something went wrong', err);
+                return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
+                        response.status(500).json(err);
+            })
 }
