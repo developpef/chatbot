@@ -103,10 +103,10 @@ function replyMessage(message, textMessage, response) {
                         return converseReq.converseText(contentMessage)
                                 .then(function (res2) {
                                     // ...extract the reply...
-                                    var reply = res2.reply();
-                                    console.log('converse2 reply', reply);
+                                    varcontent = res2.reply();
+                                    console.log('converse2 reply', varcontent);
 
-                                    return message ? message.reply([{type: 'text', content: reply}]).then() :
+                                    return message ? message.reply([{type: 'text', content: varcontent}]).then() :
                                             {result: varcontent, intent: 'null'};
                                 })
                                 .catch(err => {
