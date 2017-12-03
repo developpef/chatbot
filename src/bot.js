@@ -1,6 +1,7 @@
 const recastai = require('recastai').default;
 const client = new recastai(process.env.REQUEST_TOKEN);
 const request = require('request');
+const axios = require('axios');
 
 export const bot = (body, response, callback) => {
     console.log(body);
@@ -13,13 +14,13 @@ export const bot = (body, response, callback) => {
         client.connect.handleMessage({body}, response, replyMessage);
     } else if (body.text) {
         // pour gérer les appels par API REST en direct
-        callback(null, replyMessage(null, body.text, response));
+        replyMessage(null, body.text, callback);
     } else {
         callback('Requete vide?!');
     }
 };
 
-function replyMessage(message, textMessage, response) {
+function replyMessage(message, textMessage, callback) {
     if (message) {
         console.log("handling BotConnector message");
     } else {
@@ -44,57 +45,55 @@ function replyMessage(message, textMessage, response) {
                             console.log("number:" + number);
                             varcontent = 'je vais chercher la ' + asset + ' ' + number;
 
-                            request(
+                            axios.get('https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/' + asset + '_' + number,
                                     {
-                                        url: 'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/' + asset + '_' + number,
                                         headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
-                                    },
-                                    (_err, _res, body) => {
-                                if (_err) {
-                                    varcontent = 'Il y a eu un problème...';
-                                    return message ? message.reply([{type: 'text', content: varcontent + _err}]) :
-                                            _err;
-                                } else {
-                                    body = JSON.parse(body);
+                                    })
+                                    .then(response => {
+                                        var body = response.data;
 
-                                    if (body.managedObject) {
-                                        varcontent = 'Juste ici : ' + body.managedObject['self'] + ' !';
+                                        if (body.managedObject) {
+                                            varcontent = 'Juste ici : ' + body.managedObject['self'] + ' !';
 
-                                        var assetId = body.managedObject.id;
+                                            var assetId = body.managedObject.id;
 
-                                        //recherche de localisation
-                                        request(
-                                                {
-                                                    url: 'https://pefgfi.cumulocity.com/event/events?source=' + assetId + '&type=c8y_LocationUpdate&dateFrom=2017-09-26',
-                                                    headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
-                                                },
-                                                (_err, _res, body2) => {
-                                            var dataResp = {};
-                                            if (_err) {
-                                                varcontent = 'Il y a eu un problème...';
-                                            } else {
-                                                body2 = JSON.parse(body2);
-                                                if (body2.events && body2.events.length > 0) {
-                                                    dataResp = body2.events[0].c8y_Position;
-                                                    varcontent = 'Juste ici : https://maps.google.fr/maps?hl=fr&q=' + dataResp.lat + ',' + dataResp.lng;
-                                                } else {
-                                                    varcontent = 'Je n\'ai pas trouvé de position...';
-                                                }
-                                            }
+                                            //recherche de localisation
+                                            axios.get('https://pefgfi.cumulocity.com/event/events?source=' + assetId + '&type=c8y_LocationUpdate&dateFrom=2017-09-26',
+                                                    {
+                                                        headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
+                                                    })
+                                                    .then(response => {
+                                                        var dataResp = {};
+                                                        var body2 = response.data;
+                                                        if (body2.events && body2.events.length > 0) {
+                                                            dataResp = body2.events[0].c8y_Position;
+                                                            varcontent = 'Juste ici : https://maps.google.fr/maps?hl=fr&q=' + dataResp.lat + ',' + dataResp.lng;
+                                                        } else {
+                                                            varcontent = 'Je n\'ai pas trouvé de position...';
+                                                        }
+                                                        return message ? message.reply([{type: 'text', content: varcontent}]).then() :
+                                                                callback(null, {result: varcontent, intent: intent.slug, data: dataResp});
+                                                    })
+                                                    .catch(error => {
+                                                        varcontent = 'Il y a eu un problème...';
+                                                        return message ? message.reply([{type: 'text', content: varcontent + error}]) :
+                                                                callback(error, null);
+                                                    });
+                                        } else {
+                                            varcontent = 'Je n\'ai rien trouvé!';
                                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                                    {result: varcontent, intent: intent.slug, data: dataResp};
-                                        });
-                                    } else {
-                                        varcontent = 'Je n\'ai rien trouvé!';
-                                        return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                                {result: varcontent, intent: intent.slug};
-                                    }
-                                }
-                            });
+                                                    callback(null, {result: varcontent, intent: intent.slug});
+                                        }
+                                    })
+                                    .catch(error => {
+                                        varcontent = 'Il y a eu un problème...';
+                                        return message ? message.reply([{type: 'text', content: varcontent + error}]) :
+                                                callback(error, null);
+                                    });
                         } else {
                             varcontent = 'Je ne sais pas quoi chercher...';
                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                    {result: varcontent, intent: intent.slug};
+                                    callback(null, {result: varcontent, intent: intent.slug});
                         }
                     } else {
                         // on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
@@ -107,22 +106,22 @@ function replyMessage(message, textMessage, response) {
                                     console.log('converse2 reply', varcontent);
 
                                     return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                            {result: varcontent, intent: 'null'};
+                                            callback(null, {result: varcontent, intent: 'null'});
                                 })
                                 .catch(err => {
                                     console.error('Something went wrong', err);
                                     return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
-                                            err;
+                                            callback(err, null);
                                 });
                     }
                 } else {
                     return message ? message.reply([{type: 'text', content: varcontent}]) :
-                            {result: varcontent, intent: 'null'};
+                            callback(null, {result: varcontent, intent: 'null'});
                 }
             })
             .catch(err => {
                 console.error('Something went wrong', err);
                 return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
-                        err;
+                        callback(err, null);
             });
 }
