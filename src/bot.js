@@ -44,7 +44,7 @@ function replyMessage(message, textMessage, response) {
                                 if (_err) {
                                     varcontent = 'Il y a eu un problème...';
                                     return message ? message.reply([{type: 'text', content: varcontent + _err}]) :
-                                            response.status(500).json(_err);
+                                            response.json(_err);
                                 } else {
                                     body = JSON.parse(body);
 
@@ -73,47 +73,47 @@ function replyMessage(message, textMessage, response) {
                                                 }
                                             }
                                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                                    response.status(200).json({result: varcontent, intent: intent.slug, data: dataResp});
+                                                    response.json({result: varcontent, intent: intent.slug, data: dataResp});
                                         })
                                     } else {
                                         varcontent = 'Je n\'ai rien trouvé!';
                                         return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                                response.status(200).json({result: varcontent, intent: intent.slug});
+                                                response.json({result: varcontent, intent: intent.slug});
                                     }
                                 }
                             })
                         } else {
                             varcontent = 'Je ne sais pas quoi chercher...';
                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
-                                    response.status(200).json({result: varcontent, intent: intent.slug, data: dataResp});
+                                    response.json({result: varcontent, intent: intent.slug, data: dataResp});
                         }
                     } else {
                         // on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
                         const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE)
 
-                        return converseReq.converseText(contentMessage, {conversationToken: message.senderId})
+                        return converseReq.converseText(contentMessage)
                                 .then(function (res2) {
                                     // ...extract the reply...
                                     var reply = res2.reply()
                                     console.log('converse2 reply', reply);
 
                                     return message ? message.reply([{type: 'text', content: reply}]).then() :
-                                            response.status(200).json({result: varcontent, intent: 'null'});
+                                            response.json({result: varcontent, intent: 'null'});
                                 })
                                 .catch(err => {
                                     console.error('Something went wrong', err);
                                     return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
-                                            response.status(500).json(err);
+                                            response.json(err);
                                 })
                     }
                 } else {
                     return message ? message.reply([{type: 'text', content: varcontent}]) :
-                            response.status(200).json({result: varcontent, intent: 'null'});
+                            response.json({result: varcontent, intent: 'null'});
                 }
             })
             .catch(err => {
                 console.error('Something went wrong', err);
                 return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
-                        response.status(500).json(err);
+                        response.json(err);
             })
 }
