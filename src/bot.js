@@ -69,7 +69,7 @@ function replyMessage(message, textMessage, response) {
                                                     dataResp = body2.events[0].c8y_Position;
                                                     varcontent = 'Juste ici : https://maps.google.fr/maps?hl=fr&q=' + dataResp.lat + ',' + dataResp.lng;
                                                 } else {
-                                                    varcontent = "Je n'ai pas trouvé de position...";
+                                                    varcontent = 'Je n\'ai pas trouvé de position...';
                                                 }
                                             }
                                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
