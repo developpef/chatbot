@@ -36,6 +36,7 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 public class MainActivity extends AppCompatActivity {
 
     private ImageButton btnSpeak;
+    private Button btnInput;
     private final int REQ_CODE_SPEECH_INPUT = 100;
 
     /**
@@ -54,6 +55,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 promptSpeechInput();
+            }
+        });
+
+        btnInput = (Button) findViewById(R.id.inputBtn);
+        btnInput.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                promptTextInput();
             }
         });
 
