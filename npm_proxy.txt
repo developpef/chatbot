@@ -1,0 +1,1 @@
+npm config set https-proxy http://paul-emmanuel.faidherbe%24gfi.fr:!an14PEF@85.115.60.201:80

@@ -47,7 +47,7 @@ function replyMessage(message, textMessage, callback) {
 
                             axios.get('https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/' + asset + '_' + number,
                                     {
-                                        headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
+                                        headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
                                     })
                                     .then(response => {
                                         var body = response.data;
@@ -60,7 +60,7 @@ function replyMessage(message, textMessage, callback) {
                                             //recherche de localisation
                                             axios.get('https://pefgfi.cumulocity.com/event/events?source=' + assetId + '&type=c8y_LocationUpdate&dateFrom=2017-09-26',
                                                     {
-                                                        headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="}
+                                                        headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
                                                     })
                                                     .then(response => {
                                                         var dataResp = {};
@@ -95,6 +95,28 @@ function replyMessage(message, textMessage, callback) {
                             return message ? message.reply([{type: 'text', content: varcontent}]).then() :
                                     callback(null, {result: varcontent, intent: intent.slug});
                         }
+                    } else if (intent.slug === 'c8y_list' && intent.confidence > 0.7) {
+                        varcontent = 'Voici la liste des objets';
+                        axios.get('https://pefgfi.cumulocity.com//inventory/managedObjects',
+                                {
+                                    headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
+                                })
+                                .then(response => {
+                                    var dataResp = {list: []};
+                                    var body = response.data;
+                                    for (var i = 0; i < body.managedObjects.length; i++) {
+                                        if (body.managedObjects[i].c8y_SupportedMeasurements) {
+                                            dataResp.list.push({nom: body.managedObjects[i].name});
+                                        }
+                                    }
+                                    return message ? message.reply([{type: 'text', content: varcontent}]) :
+                                            callback(null, {result: varcontent, intent: intent.slug, data: dataResp});
+                                })
+                                .catch(err => {
+                                    console.error('Something went wrong', err);
+                                    return message ? message.reply([{type: 'text', content: 'Something went wrong' + err}]) :
+                                            callback(err, null);
+                                });
                     } else {
                         // on fait appel au moteur de conversation, pour conserver l'intelligence par defaut du bot
                         const converseReq = new recastai.request(process.env.REQUEST_TOKEN, process.env.LANGUAGE);
