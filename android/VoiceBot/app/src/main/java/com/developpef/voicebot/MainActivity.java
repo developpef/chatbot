@@ -1,18 +1,24 @@
 package com.developpef.voicebot;
 
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.speech.RecognizerIntent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.MySSLSocketFactory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,6 +77,40 @@ public class MainActivity extends AppCompatActivity {
         messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
 
+
+    private void promptTextInput() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Saisie");
+
+// Set up the input
+        final EditText input = new EditText(this);
+// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        //input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+// Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    startConversation(input.getText().toString());
+                } catch(Exception e) {
+                    Toast.makeText(getApplicationContext(),
+                            "Exception:" + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
     /**
      * Showing google speech input dialog
      * */
@@ -87,8 +127,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.speech_not_supported),
                     Toast.LENGTH_SHORT).show();
+            promptTextInput();
         }
-        //onActivityResult(REQ_CODE_SPEECH_INPUT, RESULT_OK, null);
     }
 
     /**
@@ -191,6 +231,27 @@ public class MainActivity extends AppCompatActivity {
                     //startActivity(MapActivityIntentFactory.startGoogleMaps(lat,lng));
                     startActivity(MapActivityIntentFactory.startMapBox(MainActivity.this, lat, lng));
                 }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Toast.makeText(getApplicationContext(),
+                        "erreur http "+statusCode+" "+throwable.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Toast.makeText(getApplicationContext(),
+                        "erreur2 http "+statusCode+" "+throwable.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                Toast.makeText(getApplicationContext(),
+                        "erreur3 http "+statusCode+" "+throwable.getMessage(),
+                        Toast.LENGTH_LONG).show();
             }
         });
     }

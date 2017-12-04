@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
@@ -72,7 +73,11 @@ public class ChatAdapter extends BaseAdapter {
         }
         holder.txtInfo.setText(chatMessage.getDate());
         holder.data = chatMessage.getData();
-        holder.txtMessage.setText(Html.fromHtml(chatMessage.getMessage(), Html.FROM_HTML_MODE_COMPACT));
+        if (Build.VERSION.SDK_INT >= 24) {
+            holder.txtMessage.setText(Html.fromHtml(chatMessage.getMessage(), Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            holder.txtMessage.setText(Html.fromHtml(chatMessage.getMessage()));
+        }
         if(chatMessage.isMap()) {
             holder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.maps, 0, 0, 0);
         } else {
