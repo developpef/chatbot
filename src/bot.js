@@ -96,8 +96,8 @@ function replyMessage(message, textMessage, callback) {
                                     callback(null, {result: varcontent, intent: intent.slug});
                         }
                     } else if (intent.slug === 'c8y_list' && intent.confidence > 0.7) {
-                        varcontent = 'Voici la liste des objets';
-                        axios.get('https://pefgfi.cumulocity.com//inventory/managedObjects',
+                        varcontent = 'Voici la liste des objets : ';
+                        axios.get('https://pefgfi.cumulocity.com/inventory/managedObjects',
                                 {
                                     headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
                                 })
@@ -107,6 +107,7 @@ function replyMessage(message, textMessage, callback) {
                                     for (var i = 0; i < body.managedObjects.length; i++) {
                                         if (body.managedObjects[i].c8y_SupportedMeasurements) {
                                             dataResp.list.push({nom: body.managedObjects[i].name});
+                                            varcontent += body.managedObjects[i].name + ' (' + body.managedObjects[i].type + '), ';
                                         }
                                     }
                                     return message ? message.reply([{type: 'text', content: varcontent}]) :
