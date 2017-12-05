@@ -97,7 +97,7 @@ function replyMessage(message, textMessage, callback) {
                         }
                     } else if (intent.slug === 'c8y_list' && intent.confidence > 0.7) {
                         varcontent = 'Voici la liste des objets : ';
-                        axios.get('https://pefgfi.cumulocity.com/inventory/managedObjects',
+                        axios.get('https://pefgfi.cumulocity.com/inventory/managedObjects?pageSize=50',
                                 {
                                     headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
                                 })

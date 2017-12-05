@@ -238,8 +238,8 @@ public class MainActivity extends AppCompatActivity {
                 displayMessage(chatMessage);
 
                 if(chatMessage.isMap()) {
-                    //startActivity(MapActivityIntentFactory.startGoogleMaps(lat,lng));
-                    startActivity(MapActivityIntentFactory.startMapBox(MainActivity.this, lat, lng));
+                    startActivity(MapActivityIntentFactory.startGoogleMaps(lat,lng));
+                    //startActivity(MapActivityIntentFactory.startMapBox(MainActivity.this, lat, lng));
                 }
             }
 

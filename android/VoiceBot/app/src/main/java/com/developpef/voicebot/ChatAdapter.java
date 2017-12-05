@@ -15,6 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,8 +95,8 @@ public class ChatAdapter extends BaseAdapter {
                         JSONObject data = msg.getData();
                         double lat = data.getDouble("lat");
                         double lng = data.getDouble("lng");
-                        //context.startActivity(MapActivityIntentFactory.startGoogleMaps(lat,lng));
-                        context.startActivity(MapActivityIntentFactory.startMapBox(context, lat, lng));
+                        context.startActivity(MapActivityIntentFactory.startGoogleMaps(lat,lng));
+                        //context.startActivity(MapActivityIntentFactory.startMapBox(context, lat, lng));
                     }
                 } catch (JSONException e) {
                     //
