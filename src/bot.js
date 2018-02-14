@@ -38,7 +38,7 @@ function replyMessage(message, textMessage, callback) {
                 if (intent) {
                     console.log("intent:" + intent.slug + "/" + intent.confidence);
                     if (intent.slug === 'c8y_geoloc' && intent.confidence > 0.7) {
-                        if (recastaiRes.get('asset-type') && recastaiRes.get('number')) {
+                        if (recastaiRes.get('asset-type')) {
                             var asset = recastaiRes.get('asset-type').raw;
                             console.log("asset:" + asset);
 							var url = 'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/' + asset;
