@@ -41,11 +41,19 @@ function replyMessage(message, textMessage, callback) {
                         if (recastaiRes.get('asset-type') && recastaiRes.get('number')) {
                             var asset = recastaiRes.get('asset-type').raw;
                             console.log("asset:" + asset);
-                            var number = recastaiRes.get('number').raw;
-                            console.log("number:" + number);
-                            varcontent = 'je vais chercher la ' + asset + ' ' + number;
+							var url = 'https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/' + asset;
+							
+                            var number = recastaiRes.get('number');
+                            varcontent = 'je vais chercher la ' + asset;
+							if(number) {
+								number = number.raw;
+								console.log("number:" + number);
+								varcontent += ' ' + number;
+								url += '_' + number;
+							}
+							
 
-                            axios.get('https://pefgfi.cumulocity.com/identity/externalIds/stelia_id/' + asset + '_' + number,
+                            axios.get(url ,
                                     {
                                         headers: {"Authorization": "Basic Y2hhdGJvdDpjaGF0Ym90Y2hhdGJvdA=="} // chatbot:chatbotchatbot
                                     })
